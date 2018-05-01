@@ -44,7 +44,7 @@ void InitMotorPwm(){
 
     GPIOPinConfigure(GPIO_PC6_WT1CCP0);
     GPIOPinConfigure(GPIO_PC7_WT1CCP1);
-    GPIOPinTypeTimer(GPIO_PORTC_BASE, GPIO_PIN_6 | GPIO_PIN_7);
+    GPIOPinTypeTimer(GPIO_PORTC_BASE,GPIO_PIN_6 | GPIO_PIN_7);
 
     SysCtlPeripheralEnable(SYSCTL_PERIPH_WTIMER1);
     TimerConfigure(WTIMER1_BASE, TIMER_CFG_SPLIT_PAIR | TIMER_CFG_A_PWM | TIMER_CFG_B_PWM);
@@ -182,7 +182,7 @@ void InitialConfiguration()
         GPIOIntDisable(GPIO_PORTE_BASE,GPIO_PIN_1 | GPIO_PIN_2);
         GPIOIntClear(GPIO_PORTE_BASE,GPIO_PIN_1 | GPIO_PIN_2);
         GPIOIntRegister(GPIO_PORTE_BASE,PortEIntHandler);
-        GPIOIntTypeSet(GPIO_PORTE_BASE,GPIO_PIN_1 | GPIO_PIN_2,GPIO_BOTH_EDGES);
+        GPIOIntTypeSet(GPIO_PORTE_BASE,GPIO_PIN_1 | GPIO_PIN_2,GPIO_RISING_EDGE);
         GPIOIntEnable(GPIO_PORTE_BASE,GPIO_PIN_1 | GPIO_PIN_2);
 
 

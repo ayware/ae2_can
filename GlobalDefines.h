@@ -33,10 +33,11 @@
 #define DEVICE_BMS 0x03
 
 #define UART_DATA_SIZE 30
-#define DELAY_CAN_WRITE 4 //ms
+#define DELAY_CAN_WRITE 1 //ms
 #define CAN_RX_OBJECT_ID 1
 #define CAN_TX_OBJECT_ID 2
 #define SPEED_LIMIT 20
+
 
 
 #endif /* GLOBALDEFINES_H_ */

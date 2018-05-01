@@ -156,6 +156,10 @@ void CanReceived()
                     statDeadSwitch = Received_Can_Data[1];
                     speedValue = Received_Can_Data[2];
                     speed = period*speedValue/SPEED_LIMIT;
+                    if(speed == period)
+                        speed = period - 1;
+                    else if(speed == 0)
+                        speed = 1;
 
                 }
 

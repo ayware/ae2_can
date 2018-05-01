@@ -60,8 +60,7 @@ SysTickIntHandler(void)
 {
 
 
-    if(ui32C!=0)
-        ui32C--;
+
 
 }
 
@@ -125,6 +124,10 @@ PortEIntHandler(void)
 
 }
 
+
+
+int lastTime = 0;
+
 void
 PortCIntHandler(void)
 {
@@ -133,6 +136,8 @@ PortCIntHandler(void)
     statusPin = GPIOIntStatus(GPIO_PORTC_BASE, true);
     GPIOIntClear(GPIO_PORTC_BASE,statusPin);
 
+
+
     if(Device_Address == DEVICE_RPI)
     {
 
@@ -140,8 +145,10 @@ PortCIntHandler(void)
         if(statusPin == GPIO_INT_PIN_4)
         {
 
-            if(speedValue > 0)
-                speedValue--;
+
+                if(speedValue > 0)
+                    speedValue--;
+
 
 
         }
@@ -149,11 +156,16 @@ PortCIntHandler(void)
         if(statusPin == GPIO_INT_PIN_5)
         {
 
-            if(speedValue < SPEED_LIMIT)
-                speedValue++;
+
+                if(speedValue < SPEED_LIMIT)
+                    speedValue++;
+
 
 
         }
+
+
+
 
 
 

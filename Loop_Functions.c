@@ -67,7 +67,7 @@ void LoopFunction(void)
         speedEncoder = curEncoder * 0.385;
 
         counter++;
-        if(counter == 10000)
+        if(counter == 100000)
         {
 
             counter = 0;
@@ -93,7 +93,7 @@ void LoopFunction(void)
     {
 
         counter++;
-        if(counter == 10000)
+        if(counter == 100000)
         {
 
             counter = 0;
@@ -102,8 +102,9 @@ void LoopFunction(void)
             BatteryCurrent1 = (uint8_t) (analogValues[0] & 0x00FF);
             BatteryCurrent2 = (uint8_t) ((analogValues[0] >> 8) & 0x00FF);
 
-            BatteryVoltage1 = (uint8_t) (analogValues[1] & 0x00FF);
-            BatteryVoltage2 = (uint8_t) ((analogValues[1] >> 8) & 0x00FF);
+            //BatteryVoltage1 = (uint8_t) (analogValues[1] & 0x00FF);
+            //BatteryVoltage2 = (uint8_t) ((analogValues[1] >> 8) & 0x00FF);
+            BatteryVoltage1 = (uint8_t)(analogValues[1] / (1050/13));
 
             BatteryHeat1 = (uint8_t) (analogValues[2] & 0x00FF);
             BatteryHeat2 = (uint8_t) ((analogValues[2] >> 8) & 0x00FF);
@@ -117,12 +118,11 @@ void LoopFunction(void)
 
 }
 
+float tempSpeed = 0;
 void MotorDrive(float motorSpeed){
 
 
       // Period-1 motoru durduruyor
-
-      if(motorSpeed == period) motorSpeed -= 1;
 
       TimerMatchSet(WTIMER1_BASE, TIMER_A, motorSpeed);
       TimerMatchSet(WTIMER1_BASE, TIMER_B, motorSpeed);
@@ -133,7 +133,8 @@ void MotorDrive(float motorSpeed){
 
 void MotorStop(){
 
-        TimerMatchSet(WTIMER1_BASE, TIMER_A, period - 1);
+
+        TimerMatchSet(WTIMER1_BASE, TIMER_A, 1);
         TimerMatchSet(WTIMER1_BASE, TIMER_B, period - 1);
 
 }
