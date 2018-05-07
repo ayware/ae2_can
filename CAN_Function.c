@@ -124,6 +124,7 @@ CANIntHandler(void)
 
 }
 
+
 void CanReceived()
 {
 
@@ -139,7 +140,7 @@ void CanReceived()
 
                     Register_Can[0] = speedMotor1;
                     Register_Can[1] = speedMotor2;
-                    Register_Can[2] = speedEncoder;
+                    Register_Can[2] = motorEncoder;
                     Register_Can[3] = motorControllerHeat1;
                     Register_Can[4] = motorControllerHeat2;
                     Register_Can[5] = mosfetHeat1;
@@ -155,7 +156,9 @@ void CanReceived()
                     statBreak = Received_Can_Data[0];
                     statDeadSwitch = Received_Can_Data[1];
                     speedValue = Received_Can_Data[2];
+
                     speed = period*speedValue/SPEED_LIMIT;
+
                     if(speed == period)
                         speed = period - 1;
                     else if(speed == 0)
@@ -213,7 +216,7 @@ void CanReceived()
                 Register_Uart[5] = Received_Can_Data[5];
                 Register_Uart[6] = Received_Can_Data[6];
 
-                Register_Uart[16] = Received_Can_Data[7];
+                Register_Uart[16] = 1;
 
             }
 
@@ -229,7 +232,7 @@ void CanReceived()
                 Register_Uart[11] = Received_Can_Data[4];
                 Register_Uart[12] = Received_Can_Data[5];
 
-                Register_Uart[17] = Received_Can_Data[6];
+                Register_Uart[17] = 1;
 
         }
 

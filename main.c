@@ -60,8 +60,6 @@ SysTickIntHandler(void)
 {
 
 
-
-
 }
 
 
@@ -89,22 +87,26 @@ PortEIntHandler(void)
     statusPin = GPIOIntStatus(GPIO_PORTE_BASE,true);
     GPIOIntClear(GPIO_PORTE_BASE,statusPin);
 
+
     if(Device_Address == DEVICE_RPI)
     {
 
 
-        if(statusPin == GPIO_INT_PIN_1)
+        if(statusPin == GPIO_INT_PIN_1 )
         {
             //Break Status
             statBreak = GPIOPinRead(GPIO_PORTE_BASE, GPIO_PIN_1) == GPIO_PIN_1 ? 0 : 1;
 
 
         }
-        if(statusPin == GPIO_INT_PIN_2)
+        if(statusPin == GPIO_INT_PIN_2 )
         {
             // DeadManSwitch Status
 
             statDeadSwitch = GPIOPinRead(GPIO_PORTE_BASE, GPIO_PIN_2) == GPIO_PIN_2 ? 0 : 1;
+
+            if(statDeadSwitch == 0)
+                speedValue = 0;
 
         }
 
@@ -125,9 +127,6 @@ PortEIntHandler(void)
 }
 
 
-
-int lastTime = 0;
-
 void
 PortCIntHandler(void)
 {
@@ -138,38 +137,34 @@ PortCIntHandler(void)
 
 
 
-    if(Device_Address == DEVICE_RPI)
+    if(Device_Address == DEVICE_RPI )
     {
 
 
-        if(statusPin == GPIO_INT_PIN_4)
+        if( statusPin == GPIO_INT_PIN_5)
         {
 
 
-                if(speedValue > 0)
+                if(speedValue > 0 ){
                     speedValue--;
-
-
+                }
 
         }
 
-        if(statusPin == GPIO_INT_PIN_5)
+        if( statusPin  == GPIO_INT_PIN_4)
         {
 
 
-                if(speedValue < SPEED_LIMIT)
+                if(speedValue < SPEED_LIMIT){
                     speedValue++;
-
-
+                }
 
         }
-
-
-
 
 
 
     }
+
     if(Device_Address == DEVICE_MOTOR)
        {
 
@@ -177,13 +172,20 @@ PortCIntHandler(void)
            if(statusPin == GPIO_INT_PIN_5){
 
                //Encoder
-
                wheelCounter++;
+
+
+           }
+           if(statusPin == GPIO_INT_PIN_4)
+           {
+
+               motorEncoder++;
 
            }
 
 
        }
+
 
 
 
@@ -219,6 +221,26 @@ void UARTIntHandler(void)
 }
 
 
+void WatchdogIntHandler(void)
+{
+
+    if(isErrorSys){
+
+        LedFlash(true);
+        return;
+    }
+
+
+    uint32_t status = WatchdogIntStatus(WATCHDOG0_BASE, true);
+    WatchdogIntClear(WATCHDOG0_BASE);
+
+
+    isErrorSys = true;
+
+
+}
+
+
 
 int main(void)
 {
@@ -226,11 +248,14 @@ int main(void)
    FPULazyStackingEnable();
    InitialConfiguration(); // Baþlangýç ayarlarý
 
+   LedFlash(false);
+
    while(1)
    {
 
-      LoopFunction();
 
+      LoopFunction();
+      isErrorSys = false;
 
    }
 

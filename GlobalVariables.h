@@ -30,7 +30,7 @@ uint32_t period =  0;
 float speed = 0;
 int statBreak = 0;
 int statDeadSwitch = 0;
-uint32_t speedEncoder = 0;
+uint32_t motorEncoder = 0;
 uint32_t speedValue = 0;
 
 
@@ -59,6 +59,8 @@ uint8_t canAddressFrom = 0;
 
 bool Uart_Data_received = 0;
 uint32_t uartDataCounter = 0;
+uint32_t loopCounter = 0;
+float mVoltage = 13/870; // 870/13
 
 uint32_t ui32C = 0;
 uint32_t lastEncoder = 0;
@@ -66,11 +68,10 @@ uint32_t curEncoder = 0;
 uint32_t analogValues[4];
 uint32_t wheelCounter = 0;
 uint32_t mSeconds = 0;
+bool isErrorSys = false;
 
 void SysTickIntHandler(void);
 void CANIntHandler(void);
-void delayUs(uint32_t value);
-void delayMs(uint32_t value);
 void InitialConfiguration(void);
 void CanInit (void);
 void CanPacketEvaluate(void);
@@ -87,7 +88,7 @@ void MotorStop(void);
 void TimerTick(void);
 void LoopFunction(void);
 void CanReceived(void);
-
+void WatchdogIntHandler(void);
 
 #endif /* GLOBALVARIABLES_H_ */
 

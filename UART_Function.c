@@ -50,9 +50,8 @@ void UartInit(void)
     IntEnable(INT_UART0); //enable the UART interrupt
     UARTIntEnable(UART0_BASE, UART_INT_RX | UART_INT_RT);
 
-    UARTConfigSetExpClk(UART0_BASE, SysCtlClockGet(), 115200,
-                        (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE |
-                         UART_CONFIG_PAR_NONE));     // Uart hýzý 115200 rpi dede ayný hýz olmalý
+    UARTConfigSetExpClk(UART0_BASE, SysCtlClockGet(), 115200,(UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE));     // Uart hýzý 115200 rpi dede ayný hýz olmalý
+
 }
 
 void UartReceived(){
@@ -81,9 +80,19 @@ void UartReceived(){
                      UARTCharPut(UART0_BASE, Register_Uart[i]);
                 }
 
-                //Changed Connected Device Data To Disconnected Value
-                Register_Uart[16] = 0;
-                Register_Uart[17] = 0;
+
+                loopCounter++;
+
+                if(loopCounter == 100)
+                {
+
+                    loopCounter = 0;
+
+                    Register_Uart[16] = 0;
+                    Register_Uart[17] = 0;
+
+                }
+
 
 
     }

@@ -40,8 +40,7 @@ void ADCInit (int address)
 {
     if(address == DEVICE_BMS)
     {
-        GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_3 |  GPIO_PIN_2 |  GPIO_PIN_1); // analog giriþler input yapýldý
-        ADCSequenceDisable(ADC0_BASE, 1); //Sample Sequencer 1 ile iþlem yapacaðýmýz için öncelikle kapatýyoruz.
+         ADCSequenceDisable(ADC0_BASE, 1); //Sample Sequencer 1 ile iþlem yapacaðýmýz için öncelikle kapatýyoruz.
         ADCSequenceConfigure(ADC0_BASE, 1, ADC_TRIGGER_PROCESSOR, 0);
         ADCSequenceStepConfigure(ADC0_BASE, 1, 0, ADC_CTL_CH0); //Sequencer Adým 0 : PE3
         ADCSequenceStepConfigure(ADC0_BASE, 1, 1, ADC_CTL_CH1); //Sequencer Adým 1 : PE2
@@ -49,17 +48,22 @@ void ADCInit (int address)
         ADCSequenceStepConfigure(ADC0_BASE, 1, 3, ADC_CTL_TS | ADC_CTL_IE | ADC_CTL_END); //Sequencer Adým 3 : Sýcaklýk sensörünün deðeri ve
         ADCSequenceEnable(ADC0_BASE, 1);
         ADCIntClear(ADC0_BASE, 1);
+
     }
-    else if (address == DEVICE_MOTOR)
+    else if(address == DEVICE_MOTOR)
     {
-        GPIOPinTypeADC(GPIO_PORTE_BASE,GPIO_PIN_1); // analog giriþler input yapýldý
-        ADCSequenceDisable(ADC0_BASE, 1); //Sample Sequencer 1 ile iþlem yapacaðýmýz için öncelikle kapatýyoruz.
-        ADCSequenceConfigure(ADC0_BASE, 1, ADC_TRIGGER_PROCESSOR, 0);
-        ADCSequenceStepConfigure(ADC0_BASE, 1, 2, ADC_CTL_CH2); //Sequencer Adým 2 : PE1
-        ADCSequenceStepConfigure(ADC0_BASE, 1, 3, ADC_CTL_TS | ADC_CTL_IE | ADC_CTL_END); //Sequencer Adým 3 : Sýcaklýk sensörünün deðeri ve
-        ADCSequenceEnable(ADC0_BASE, 1);
-        ADCIntClear(ADC0_BASE, 1);
+
+       ADCSequenceDisable(ADC0_BASE, 3); // Kurmadan önce disable ettik
+        ADCSequenceConfigure(ADC0_BASE, 3, ADC_TRIGGER_PROCESSOR, 0);
+        ADCSequenceStepConfigure(ADC0_BASE, 3, 0, ADC_CTL_CH0);
+        ADCSequenceStepConfigure(ADC0_BASE, 3, 3, ADC_CTL_TS | ADC_CTL_IE | ADC_CTL_END); // final sequence config edildi
+        ADCSequenceEnable(ADC0_BASE, 3);
+        ADCIntClear(ADC0_BASE, 3);
+
+
     }
+
+
 
 }
 void GetADCResults (void)
@@ -69,9 +73,26 @@ void GetADCResults (void)
         for(i=0;i<4;i++)
             analogValues[i]=0;
 
-        ADCProcessorTrigger(ADC0_BASE, 1);
-        while(!ADCIntStatus(ADC0_BASE, 1, false));
-        ADCIntClear(ADC0_BASE, 1);
-        ADCSequenceDataGet(ADC0_BASE, 1, analogValues);
+       if(Device_Address == DEVICE_BMS)
+       {
+
+
+       ADCProcessorTrigger(ADC0_BASE, 1);
+       while(!ADCIntStatus(ADC0_BASE, 1, false));
+       ADCIntClear(ADC0_BASE, 1);
+       ADCSequenceDataGet(ADC0_BASE, 1, analogValues);
+
+       }
+       else if(Device_Address == DEVICE_MOTOR)
+       {
+
+           ADCProcessorTrigger(ADC0_BASE, 3);
+           while(!ADCIntStatus(ADC0_BASE, 3, false));
+           ADCIntClear(ADC0_BASE, 3);
+           ADCSequenceDataGet(ADC0_BASE, 3, analogValues);
+
+       }
+
+
 
 }

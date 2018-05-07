@@ -30,7 +30,7 @@ extern uint32_t period;
 extern float speed;
 extern int statBreak;
 extern int statDeadSwitch;
-extern uint32_t speedEncoder;
+extern uint32_t motorEncoder;
 extern uint32_t speedValue;
 
 
@@ -59,6 +59,8 @@ extern uint8_t canAddressFrom;
 
 extern bool Uart_Data_received;
 extern uint32_t uartDataCounter;
+extern uint32_t loopCounter;
+extern float mVoltage;
 
 extern uint32_t ui32C;
 extern uint32_t lastEncoder;
@@ -66,11 +68,10 @@ extern uint32_t curEncoder;
 extern uint32_t analogValues[4];
 extern uint32_t wheelCounter;
 extern uint32_t mSeconds;
+extern bool isErrorSys;
 
 extern void SysTickIntHandler(void);
 extern void CANIntHandler(void);
-extern void delayUs(uint32_t value);
-extern void delayMs(uint32_t value);
 extern void InitialConfiguration(void);
 extern void CanInit (void);
 extern void CanPacketEvaluate(void);
@@ -87,6 +88,7 @@ extern void MotorStop(void);
 extern void TimerTick(void);
 extern void LoopFunction(void);
 extern void CanReceived(void);
+extern void WatchdogIntHandler(void);
 
 
 #endif /* GLOBALVARIABLESEXTERN_H_ */

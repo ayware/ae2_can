@@ -41,8 +41,6 @@ void LoopFunction(void)
 {
 
 
-    LedFlash(true);
-
     if( Device_Address == DEVICE_RPI)
     {
 
@@ -60,14 +58,15 @@ void LoopFunction(void)
         CanWrite(CATEGORY_CHECK,DEVICE_RPI,DEVICE_MOTOR,&Register_Can[0]);
 
 
+
     }
     else if(Device_Address == DEVICE_MOTOR)
     {
 
-        speedEncoder = curEncoder * 0.385;
+        motorEncoder = curEncoder * 0.385;
 
         counter++;
-        if(counter == 100000)
+        if(counter == 50000)
         {
 
             counter = 0;
@@ -87,27 +86,36 @@ void LoopFunction(void)
         else
             MotorDrive(speed);
 
+        counter++;
+        if(counter == 10000)
+        {
+
+            counter = 0;
+
+            GetADCResults();
+
+            mosfetHeat1 = (uint8_t)(analogValues[0] >> 8);
+            mosfetHeat2 = (uint8_t)(analogValues[0] & 0x000000FF);
+
+
+             }
+
 
     }
     else if(Device_Address == DEVICE_BMS)
     {
 
         counter++;
-        if(counter == 100000)
+        if(counter == 10000)
         {
 
             counter = 0;
 
             GetADCResults();
-            BatteryCurrent1 = (uint8_t) (analogValues[0] & 0x00FF);
-            BatteryCurrent2 = (uint8_t) ((analogValues[0] >> 8) & 0x00FF);
 
-            //BatteryVoltage1 = (uint8_t) (analogValues[1] & 0x00FF);
-            //BatteryVoltage2 = (uint8_t) ((analogValues[1] >> 8) & 0x00FF);
-            BatteryVoltage1 = (uint8_t)(analogValues[1] / (1050/13));
+            BatteryVoltage1 = (uint8_t)( analogValues[2] / (float)(870/13) );
+            BatteryCurrent1 = (uint8_t)( analogValues[1] / (float)(1000/0.09) );
 
-            BatteryHeat1 = (uint8_t) (analogValues[2] & 0x00FF);
-            BatteryHeat2 = (uint8_t) ((analogValues[2] >> 8) & 0x00FF);
 
         }
 
@@ -118,14 +126,13 @@ void LoopFunction(void)
 
 }
 
-float tempSpeed = 0;
 void MotorDrive(float motorSpeed){
 
 
       // Period-1 motoru durduruyor
 
-      TimerMatchSet(WTIMER1_BASE, TIMER_A, motorSpeed);
-      TimerMatchSet(WTIMER1_BASE, TIMER_B, motorSpeed);
+     TimerMatchSet(WTIMER1_BASE, TIMER_A, period - motorSpeed);
+     TimerMatchSet(WTIMER1_BASE, TIMER_B, period - motorSpeed);
 
 }
 
@@ -134,8 +141,8 @@ void MotorDrive(float motorSpeed){
 void MotorStop(){
 
 
-        TimerMatchSet(WTIMER1_BASE, TIMER_A, 1);
-        TimerMatchSet(WTIMER1_BASE, TIMER_B, period - 1);
+       TimerMatchSet(WTIMER1_BASE, TIMER_A, period - 1);
+       TimerMatchSet(WTIMER1_BASE, TIMER_B, period - 1);
 
 }
 

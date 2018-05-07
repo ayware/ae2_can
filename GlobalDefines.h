@@ -8,7 +8,7 @@
 #ifndef GLOBALDEFINES_H_
 #define GLOBALDEFINES_H_
 
-#define LED1	GPIO_PIN_2	//Port B
+#define LED1    GPIO_PIN_2	//Port B
 
 #define SW1	GPIO_PIN_0	//Port D
 #define SW2	GPIO_PIN_1	//Port D
@@ -33,10 +33,10 @@
 #define DEVICE_BMS 0x03
 
 #define UART_DATA_SIZE 30
-#define DELAY_CAN_WRITE 1 //ms
+#define DELAY_CAN_WRITE 3
 #define CAN_RX_OBJECT_ID 1
 #define CAN_TX_OBJECT_ID 2
-#define SPEED_LIMIT 20
+#define SPEED_LIMIT 10
 
 
 

@@ -39,6 +39,7 @@ extern void UARTIntHandler(void);
 extern void PortEIntHandler(void);
 extern void PortCIntHandler(void);
 extern void TimerTick(void);
+extern void WatchdogIntHandler(void);
 
 //*****************************************************************************
 //
@@ -107,10 +108,10 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // ADC Sequence 1
     IntDefaultHandler,                      // ADC Sequence 2
     IntDefaultHandler,                      // ADC Sequence 3
-    IntDefaultHandler,                      // Watchdog timer
+    WatchdogIntHandler,                      // Watchdog timer
     IntDefaultHandler,                      // Timer 0 subtimer A
     IntDefaultHandler,                      // Timer 0 subtimer B
-    TimerTick,                      // Timer 1 subtimer A
+    TimerTick,                              // Timer 1 subtimer A
     IntDefaultHandler,                      // Timer 1 subtimer B
     IntDefaultHandler,                      // Timer 2 subtimer A
     IntDefaultHandler,                      // Timer 2 subtimer B
@@ -128,7 +129,7 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // Timer 3 subtimer B
     IntDefaultHandler,                      // I2C1 Master and Slave
     IntDefaultHandler,                      // Quadrature Encoder 1
-    CANIntHandler,                      // CAN0
+    CANIntHandler,                          // CAN0
     IntDefaultHandler,                      // CAN1
     0,                                      // Reserved
     0,                                      // Reserved
@@ -264,6 +265,7 @@ NmiSR(void)
     //
     // Enter an infinite loop.
     //
+
     while(1)
     {
     }

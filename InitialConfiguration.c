@@ -60,17 +60,14 @@ void InitMotorPwm(){
 
     //https://sites.google.com/site/luiselectronicprojects/tutorials/tiva-tutorials/tiva-general-purpose-timers/timer-pwm---rgb-led
 
-
-
-
 }
 
 
-void InitTimer(void)
+void TimerInit(void)
 {
 
 
-    // Timer setted to 1 second
+    // Timer 1 sn. ye set edildi
 
     SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER1);
     TimerConfigure(TIMER1_BASE,TIMER_CFG_PERIODIC);
@@ -89,22 +86,26 @@ void InitialConfiguration()
 	//SysCtlClockSet( SYSCTL_SYSDIV_2_5 | SYSCTL_USE_PLL | SYSCTL_XTAL_16MHZ | SYSCTL_OSC_MAIN);//SYSCTL_SYSDIV_5 - 40MHz//SYSCTL_SYSDIV_2_5 80MHz
 	// sistem clock u 25 MHz e set edildi.
 	SysCtlClockSet( SYSCTL_SYSDIV_8 | SYSCTL_USE_PLL | SYSCTL_XTAL_16MHZ | SYSCTL_OSC_MAIN);//SYSCTL_SYSDIV_5 - 40MHz//SYSCTL_SYSDIV_2_5 80MHz // SYSCTL_SYSDIV_8 25Mhz
-	// Delay fonksiyonunun istenen deðerde kalamasý için cristal ile ayný deðer seçilir.
 
 
-    // WDT 2s ye kuruldu.
-    //SysCtlPeripheralEnable(SYSCTL_PERIP H_WDOG0);
-    //WatchdogReloadSet(WATCHDOG0_BASE,25000000);
-    //WatchdogResetEnable(WATCHDOG0_BASE);
-   // WatchdogEnable(WATCHDOG0_BASE);
+	// 1 sn. de sistem istenilen yere gelmez ise  yazýlýmsal reset atýlýr
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_WDOG0); // WDOG0 aktif edildi
+    WatchdogReloadSet(WATCHDOG0_BASE,SysCtlClockGet()); // System saati ile set edildi
+    WatchdogIntClear(WATCHDOG0_BASE); // Interrupt clear edildi
+    WatchdogIntRegister(WATCHDOG0_BASE,WatchdogIntHandler); // Register edildi
+    WatchdogIntTypeSet(WATCHDOG0_BASE, WATCHDOG_INT_TYPE_INT); // IntType set edildi
+    WatchdogResetEnable(WATCHDOG0_BASE); // Reset enable edildi
+    WatchdogIntEnable(WATCHDOG0_BASE); // Interrupt enable edildi
+    WatchdogEnable(WATCHDOG0_BASE); // Watchdog enable edildi
+
 
     //Port D konfigürasyonu
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD);
     GPIOPinTypeGPIOInput(GPIO_PORTD_BASE, SW1 | SW2 | SW3 | SW4); // adresleme pinleri input yapýldý
 
-    Device_Address=~(0xFFFFFFF0|GPIOPinRead(GPIO_PORTD_BASE,SW1|SW2|SW3|SW4));
+    Device_Address =~ (0xFFFFFFF0|GPIOPinRead(GPIO_PORTD_BASE,SW1|SW2|SW3|SW4));
 
-    SysTickPeriodSet(25);
+    SysTickPeriodSet(25); // System periodu set edildi
 
     // Bütün kesmeler aktif edildi
     IntMasterEnable();
@@ -112,117 +113,108 @@ void InitialConfiguration()
     SysTickEnable();
     SysTickDisable();
 
-    //Port A konfigürasyonu
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
 
-    if(Device_Address==DEVICE_RPI)
+    if(Device_Address == DEVICE_RPI)
     {
-        GPIOPinTypeGPIOInput(GPIO_PORTA_BASE, GPIO_PIN_0 ); // Rx uart input oldu
+
+
+        SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);  // Port A aktif edildi
+        SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC);  // Port C aktif edildi
+        SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);  // Port E aktif edildi
+
+        // Port A conf.
+        GPIOPinTypeGPIOInput(GPIO_PORTA_BASE, GPIO_PIN_0); // Rx uart input oldu
         GPIOPinTypeGPIOOutput(GPIO_PORTA_BASE, GPIO_PIN_1); // Tx uart output oldu
 
+        //Port C conf.
+        GPIOPinTypeGPIOInput(GPIO_PORTC_BASE, GPIO_PIN_4 | GPIO_PIN_5); // Speed+ ve Speed- pinleri input edildi
+        GPIOIntDisable(GPIO_PORTC_BASE,GPIO_PIN_4 | GPIO_PIN_5); // Interrupt disable edildi
+        GPIOIntClear(GPIO_PORTC_BASE,GPIO_PIN_4 | GPIO_PIN_5); // Interrupt clear edildi
+        GPIOIntRegister(GPIO_PORTC_BASE,PortCIntHandler); // Interrupt register edildi
+        GPIOIntTypeSet(GPIO_PORTC_BASE, GPIO_PIN_4 | GPIO_PIN_5,GPIO_RISING_EDGE); // Interrupt type set edildi
+        GPIOIntEnable(GPIO_PORTC_BASE, GPIO_PIN_4 | GPIO_PIN_5);  // Interrupt aktif edildi
 
-    }
-    else
-        GPIOPinTypeGPIOOutput(GPIO_PORTA_BASE, GPIO_PIN_0|GPIO_PIN_1); // Tx uart output oldu
-
-    //Port B konfigürasyonu
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
-    GPIOPinTypeGPIOInput(GPIO_PORTB_BASE, GPIO_PIN_4 );   // Rx Can input oldu
-    GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, LED1 | GPIO_PIN_5); // Led çýkýþý ve Tx Can outout oldu
-    GPIOPadConfigSet(GPIO_PORTB_BASE, LED1 , GPIO_STRENGTH_8MA, GPIO_PIN_TYPE_STD); // led çýkýþý 8ma oldu
-
-	//Port C konfigürasyonu
-	SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC);
-    if(Device_Address==DEVICE_MOTOR)
-    {
-        GPIOPinTypeGPIOInput(GPIO_PORTC_BASE, GPIO_PIN_4 | GPIO_PIN_5);   //  encoder giriþleri input yapýldý
-        GPIOPinTypeGPIOOutput(GPIO_PORTC_BASE, PWM1 | PWM2); // pwm çýkýþlarý output yalpýldý
-
-        GPIOIntDisable(GPIO_PORTC_BASE,GPIO_PIN_4 | GPIO_PIN_5);
-        GPIOIntClear(GPIO_PORTC_BASE,GPIO_PIN_4 | GPIO_PIN_5);
-        GPIOIntRegister(GPIO_PORTC_BASE,PortCIntHandler);
-        GPIOIntTypeSet(GPIO_PORTC_BASE, GPIO_PIN_4 | GPIO_PIN_5,GPIO_RISING_EDGE);
-        GPIOIntEnable(GPIO_PORTC_BASE, GPIO_PIN_4 | GPIO_PIN_5);
+        // Port E conf.
+        GPIOPinTypeGPIOInput(GPIO_PORTE_BASE,GPIO_PIN_2 |  GPIO_PIN_1);  // Deadman ve Fren pinleri input edildi
+        GPIOIntDisable(GPIO_PORTE_BASE,GPIO_PIN_1 | GPIO_PIN_2);        // Interrupt disable edildi
+        GPIOIntClear(GPIO_PORTE_BASE,GPIO_PIN_1 | GPIO_PIN_2);          // Interrupt clear edildi
+        GPIOIntRegister(GPIO_PORTE_BASE,PortEIntHandler);                // Interrupt register edildi
+        GPIOIntTypeSet(GPIO_PORTE_BASE,GPIO_PIN_1 | GPIO_PIN_2,GPIO_BOTH_EDGES); // Interrupt type set edildi
+        GPIOIntEnable(GPIO_PORTE_BASE,GPIO_PIN_1 | GPIO_PIN_2);     // Interrupt aktif edildi
 
 
-        InitMotorPwm();
-
-
-    }else if(Device_Address == DEVICE_RPI)
-    {
-
-        GPIOPinTypeGPIOInput(GPIO_PORTC_BASE, GPIO_PIN_4 | GPIO_PIN_5);
-
-        GPIOIntDisable(GPIO_PORTC_BASE,GPIO_PIN_4 | GPIO_PIN_5);
-        GPIOIntClear(GPIO_PORTC_BASE,GPIO_PIN_4 | GPIO_PIN_5);
-        GPIOIntRegister(GPIO_PORTC_BASE,PortCIntHandler);
-        GPIOIntTypeSet(GPIO_PORTC_BASE, GPIO_PIN_4 | GPIO_PIN_5,GPIO_RISING_EDGE);
-        GPIOIntEnable(GPIO_PORTC_BASE, GPIO_PIN_4 | GPIO_PIN_5);
-
+        UartInit(); // Uart init yapýldý
 
 
     }
-    else
-        GPIOPinTypeGPIOOutput(GPIO_PORTC_BASE, INA | INB | PWM1 | PWM2); // pwm çýkýþlarý output yalpýldý
-
-
-	//Port E konfigürasyonu
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);
-    if(Device_Address==DEVICE_MOTOR)
+    else if(Device_Address == DEVICE_MOTOR)
     {
-        GPIOPinTypeGPIOInput(GPIO_PORTE_BASE, GPIO_PIN_1);
-        SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC0);
+
+
+        SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC); // Port C aktif edildi
+        SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE); // Port E aktif edildi
+        SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC0); // ADC0 modulü aktif edildi
+
+
+        // Port C conf.
+        GPIOPinTypeGPIOOutput(GPIO_PORTC_BASE, GPIO_PIN_6 | GPIO_PIN_7);  // Motor Pwm pinleri output yapýldý
+        GPIOPinTypeGPIOInput(GPIO_PORTC_BASE, GPIO_PIN_1 | GPIO_PIN_4 | GPIO_PIN_5);   // Mosfet sýcaklýk ve Encoder pinleri input yapýldý( MotorEncoder ve TekerEncoder)
+        GPIOPinTypeADC(GPIO_PORTC_BASE, GPIO_PIN_2 |  GPIO_PIN_1); // Analog giriþler input yapýldý
+
+        // Port E conf.
+        GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_3); // Giriþler analog set edildi
+
+
+        GPIOIntDisable(GPIO_PORTC_BASE,GPIO_PIN_4 | GPIO_PIN_5);  // Encoder pin interrupt disable edildi
+        GPIOIntClear(GPIO_PORTC_BASE,GPIO_PIN_4 | GPIO_PIN_5); //Encoder pin interrupt clear edildi
+        GPIOIntRegister(GPIO_PORTC_BASE,PortCIntHandler); // Encoder pin interrupt register edildi
+        GPIOIntTypeSet(GPIO_PORTC_BASE, GPIO_PIN_4 | GPIO_PIN_5,GPIO_RISING_EDGE); // Encoder pin interrupt type set edildi
+        GPIOIntEnable(GPIO_PORTC_BASE, GPIO_PIN_4 | GPIO_PIN_5); // Encoder pin interrupt enable edildi
+
+
+        InitMotorPwm(); // Motor Pwmleri init yapýldý
+
+        ADCInit(DEVICE_MOTOR);
 
 
     }
-    else  if(Device_Address==DEVICE_RPI)
-    {
-        GPIOPinTypeGPIOInput(GPIO_PORTE_BASE, GPIO_PIN_3 |  GPIO_PIN_2 |  GPIO_PIN_1);
-
-        GPIOIntDisable(GPIO_PORTE_BASE,GPIO_PIN_1 | GPIO_PIN_2);
-        GPIOIntClear(GPIO_PORTE_BASE,GPIO_PIN_1 | GPIO_PIN_2);
-        GPIOIntRegister(GPIO_PORTE_BASE,PortEIntHandler);
-        GPIOIntTypeSet(GPIO_PORTE_BASE,GPIO_PIN_1 | GPIO_PIN_2,GPIO_RISING_EDGE);
-        GPIOIntEnable(GPIO_PORTE_BASE,GPIO_PIN_1 | GPIO_PIN_2);
-
-
-        SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC0);
-
-
-    }
-    else if(Device_Address==DEVICE_BMS)
-    {
-        GPIOPinTypeGPIOInput(GPIO_PORTE_BASE, GPIO_PIN_3 |  GPIO_PIN_2 |  GPIO_PIN_1);
-        SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC0);
-    }
-
-    CanInit();
-
-    if(Device_Address==DEVICE_RPI)
-        UartInit();
     else if(Device_Address == DEVICE_BMS)
-	    ADCInit(DEVICE_BMS);
-	else if(Device_Address==DEVICE_MOTOR)
-	    ADCInit(DEVICE_MOTOR);
-
-    InitTimer();
-
-}
+    {
 
 
-void delayMs(uint32_t value)
-{
-    ui32C=1000*value;
-    SysTickEnable();
-    while(ui32C);
-    SysTickDisable();
-}
-void delayUs(uint32_t value)
-{
-    ui32C=value;
-    SysTickEnable();
-    while(ui32C);
-    SysTickDisable();
+        SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE); // Port E aktif edildi
+        SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC); // Port C aktif edildi
+        SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC0); // ADC0 modulü aktif edildi
+
+        // Port E conf.
+        GPIOPinTypeGPIOInput(GPIO_PORTE_BASE ,GPIO_PIN_3); // Sýcaklýk pini input edildi
+        GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_1); // Giriþler analog set edildi
+
+        // Port C conf.
+        GPIOPinTypeGPIOInput(GPIO_PORTC_BASE, GPIO_PIN_1 | GPIO_PIN_2); // Akým,voltage pinleri input edildi
+
+
+
+        ADCInit(DEVICE_BMS); // ADC init yapýldý
+
+
+    }
+
+        // Tüm kartlar için ortak conf. yapýldý
+
+        SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB); // Port B aktif edildi
+
+        // Port B conf.
+        GPIOPinTypeGPIOInput(GPIO_PORTB_BASE, GPIO_PIN_4 );   // Rx Can input oldu
+        GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, LED1 | GPIO_PIN_5); // Led çýkýþý ve Tx Can outout oldu
+        GPIOPadConfigSet(GPIO_PORTB_BASE, LED1 , GPIO_STRENGTH_8MA, GPIO_PIN_TYPE_STD); // led çýkýþý 8ma oldu
+
+
+        CanInit();
+        TimerInit();
+
+
+
 }
 
 void LedFlash(bool value)
