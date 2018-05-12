@@ -40,7 +40,7 @@ void ADCInit (int address)
 {
     if(address == DEVICE_BMS)
     {
-         ADCSequenceDisable(ADC0_BASE, 1); //Sample Sequencer 1 ile iþlem yapacaðýmýz için öncelikle kapatýyoruz.
+        ADCSequenceDisable(ADC0_BASE, 1); //Sample Sequencer 1 ile iþlem yapacaðýmýz için öncelikle kapatýyoruz.
         ADCSequenceConfigure(ADC0_BASE, 1, ADC_TRIGGER_PROCESSOR, 0);
         ADCSequenceStepConfigure(ADC0_BASE, 1, 0, ADC_CTL_CH0); //Sequencer Adým 0 : PE3
         ADCSequenceStepConfigure(ADC0_BASE, 1, 1, ADC_CTL_CH1); //Sequencer Adým 1 : PE2
@@ -53,7 +53,7 @@ void ADCInit (int address)
     else if(address == DEVICE_MOTOR)
     {
 
-       ADCSequenceDisable(ADC0_BASE, 3); // Kurmadan önce disable ettik
+        ADCSequenceDisable(ADC0_BASE, 3);
         ADCSequenceConfigure(ADC0_BASE, 3, ADC_TRIGGER_PROCESSOR, 0);
         ADCSequenceStepConfigure(ADC0_BASE, 3, 0, ADC_CTL_CH0);
         ADCSequenceStepConfigure(ADC0_BASE, 3, 3, ADC_CTL_TS | ADC_CTL_IE | ADC_CTL_END); // final sequence config edildi
@@ -71,16 +71,24 @@ void GetADCResults (void)
         uint8_t i;
 
         for(i=0;i<4;i++)
-            analogValues[i]=0;
+            analogValues[i] = 0;
 
        if(Device_Address == DEVICE_BMS)
        {
 
 
-       ADCProcessorTrigger(ADC0_BASE, 1);
-       while(!ADCIntStatus(ADC0_BASE, 1, false));
-       ADCIntClear(ADC0_BASE, 1);
-       ADCSequenceDataGet(ADC0_BASE, 1, analogValues);
+           ADCProcessorTrigger(ADC0_BASE, 1);
+           while(!ADCIntStatus(ADC0_BASE, 1, false));
+           ADCIntClear(ADC0_BASE, 1);
+           ADCSequenceDataGet(ADC0_BASE, 1, analogValues);
+
+
+          mosfetHeat1 = (uint8_t) (analogValues[0] & 0x00FF);
+          mosfetHeat2 = (uint8_t) ((analogValues[0] >> 8) & 0x00FF);
+
+          motorControllerHeat1 = (uint8_t) (analogValues[3] & 0x00FF);
+          motorControllerHeat2 = (uint8_t) ((analogValues[3] >> 8) & 0x00FF);
+
 
        }
        else if(Device_Address == DEVICE_MOTOR)
@@ -90,6 +98,11 @@ void GetADCResults (void)
            while(!ADCIntStatus(ADC0_BASE, 3, false));
            ADCIntClear(ADC0_BASE, 3);
            ADCSequenceDataGet(ADC0_BASE, 3, analogValues);
+
+
+           BatteryVoltage1 = (uint8_t)( analogValues[2] / (float)(870/13) );
+           BatteryCurrent1 = (uint8_t)( analogValues[1] / (float)(1000/0.09) );
+
 
        }
 

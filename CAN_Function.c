@@ -78,8 +78,6 @@ CANIntHandler(void)
 
     if(canStatus == CAN_INT_INTID_STATUS)
     {
-
-
         canStatus = CANStatusGet(CAN0_BASE, CAN_STS_CONTROL);
         isErrFlag = 1;
         isRxFlag = 0;
@@ -87,7 +85,6 @@ CANIntHandler(void)
     }
     else if(canStatus == 1)
     {
-
 
         isErrFlag = 0;
         isRxFlag = 1;
@@ -129,6 +126,7 @@ void CanReceived()
 {
 
 
+    // ---------- MOTOR ----------------
     if(canAddressTo == DEVICE_MOTOR)
     {
 
@@ -169,6 +167,7 @@ void CanReceived()
         }
 
     }
+    // ---------- BMS ----------------
     else if(canAddressTo == DEVICE_BMS)
     {
 
@@ -198,6 +197,7 @@ void CanReceived()
         }
 
     }
+    // ---------- RPI ----------------
     else if(canAddressTo == DEVICE_RPI)
     {
 
@@ -238,6 +238,8 @@ void CanReceived()
 
 
     }
+
+    // --------------------------------------------------
 
 
 

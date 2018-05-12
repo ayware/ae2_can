@@ -77,7 +77,6 @@ void TimerInit(void)
     TimerEnable(TIMER1_BASE,TIMER_A);
 
 
-
 }
 
 void InitialConfiguration()
@@ -161,15 +160,15 @@ void InitialConfiguration()
         GPIOPinTypeGPIOInput(GPIO_PORTC_BASE, GPIO_PIN_1 | GPIO_PIN_4 | GPIO_PIN_5);   // Mosfet sýcaklýk ve Encoder pinleri input yapýldý( MotorEncoder ve TekerEncoder)
         GPIOPinTypeADC(GPIO_PORTC_BASE, GPIO_PIN_2 |  GPIO_PIN_1); // Analog giriþler input yapýldý
 
-        // Port E conf.
-        GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_3); // Giriþler analog set edildi
-
-
         GPIOIntDisable(GPIO_PORTC_BASE,GPIO_PIN_4 | GPIO_PIN_5);  // Encoder pin interrupt disable edildi
         GPIOIntClear(GPIO_PORTC_BASE,GPIO_PIN_4 | GPIO_PIN_5); //Encoder pin interrupt clear edildi
         GPIOIntRegister(GPIO_PORTC_BASE,PortCIntHandler); // Encoder pin interrupt register edildi
         GPIOIntTypeSet(GPIO_PORTC_BASE, GPIO_PIN_4 | GPIO_PIN_5,GPIO_RISING_EDGE); // Encoder pin interrupt type set edildi
         GPIOIntEnable(GPIO_PORTC_BASE, GPIO_PIN_4 | GPIO_PIN_5); // Encoder pin interrupt enable edildi
+
+
+        // Port E conf.
+        GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_3); // Giriþler analog set edildi
 
 
         InitMotorPwm(); // Motor Pwmleri init yapýldý

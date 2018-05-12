@@ -44,6 +44,7 @@ void LoopFunction(void)
     if( Device_Address == DEVICE_RPI)
     {
 
+
         Register_Uart[13] = statBreak;
         Register_Uart[14] = statDeadSwitch;
         Register_Uart[15] = speedValue;
@@ -52,8 +53,10 @@ void LoopFunction(void)
         Register_Can[1] = statDeadSwitch;
         Register_Can[2] = speedValue;
 
+        // Motor kartýna speed,break,deadSwitch bilgilerini yolluyor
         CanWrite(CATEGORY_SPEED, DEVICE_RPI, DEVICE_MOTOR,&Register_Can[0]);
 
+        // RPI den diðer kartlara istek yolluyor
         CanWrite(CATEGORY_CHECK,DEVICE_RPI,DEVICE_BMS,&Register_Can[0]);
         CanWrite(CATEGORY_CHECK,DEVICE_RPI,DEVICE_MOTOR,&Register_Can[0]);
 
@@ -65,40 +68,18 @@ void LoopFunction(void)
 
         motorEncoder = curEncoder * 0.385;
 
-        counter++;
-        if(counter == 50000)
-        {
-
-            counter = 0;
-
-            GetADCResults();
-            mosfetHeat1 = (uint8_t) (analogValues[0] & 0x00FF);
-            mosfetHeat2 = (uint8_t) ((analogValues[0] >> 8) & 0x00FF);
-
-            motorControllerHeat1 = (uint8_t) (analogValues[3] & 0x00FF);
-            motorControllerHeat2 = (uint8_t) ((analogValues[3] >> 8) & 0x00FF);
-
-
-        }
-
         if(statBreak || !statDeadSwitch)
             MotorStop();
         else
             MotorDrive(speed);
 
+
         counter++;
-        if(counter == 10000)
+        if(counter == 50000)
         {
-
             counter = 0;
-
             GetADCResults();
-
-            mosfetHeat1 = (uint8_t)(analogValues[0] >> 8);
-            mosfetHeat2 = (uint8_t)(analogValues[0] & 0x000000FF);
-
-
-             }
+        }
 
 
     }
@@ -106,20 +87,11 @@ void LoopFunction(void)
     {
 
         counter++;
-        if(counter == 10000)
+        if(counter == 50000)
         {
-
             counter = 0;
-
             GetADCResults();
-
-            BatteryVoltage1 = (uint8_t)( analogValues[2] / (float)(870/13) );
-            BatteryCurrent1 = (uint8_t)( analogValues[1] / (float)(1000/0.09) );
-
-
         }
-
-
 
     }
 
