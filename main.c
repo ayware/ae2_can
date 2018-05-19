@@ -72,8 +72,11 @@ TimerTick(void)
 
     mSeconds++;
 
-    curEncoder = wheelCounter - lastEncoder;
-    lastEncoder = wheelCounter;
+    curWheelEncoder = wheelEncoder - lastWheelEncoder;
+    curMotorEncoder = motorEncoder - lastMotorEncoder;
+
+    lastWheelEncoder = curWheelEncoder;
+    lastMotorEncoder = curMotorEncoder;
 
 
 }
@@ -155,7 +158,7 @@ PortCIntHandler(void)
         {
 
 
-                if(speedValue < SPEED_LIMIT){
+                if(speedValue < SPEED_VALUE_LIMIT){
                     speedValue++;
                 }
 
@@ -171,8 +174,8 @@ PortCIntHandler(void)
 
            if(statusPin == GPIO_INT_PIN_5){
 
-               //Encoder
-               wheelCounter++;
+
+               wheelEncoder++;
 
 
            }
@@ -194,39 +197,13 @@ PortCIntHandler(void)
 
 
 
-void UARTIntHandler(void)
-{
-
- unsigned long ulStatus;
- ulStatus = UARTIntStatus(UART0_BASE, true); //get interrupt status
- UARTIntClear(UART0_BASE, ulStatus); //clear the asserted interrupts
- while(UARTCharsAvail(UART0_BASE)) //loop while there are chars
-  {
-     Received_Uart_Data[uartDataCounter++]=UARTCharGetNonBlocking(UART0_BASE);
-
-     if(Received_Uart_Data[0]!=0x5A)
-         uartDataCounter=0;
-
-     if(uartDataCounter==4)
-     {
-         uartDataCounter=0;
-         Uart_Data_received=1;
-
-         UartReceived();
-
-     }
-
-  }
-
-}
 
 
 void WatchdogIntHandler(void)
 {
 
-    if(isErrorSys){
+    if(!clearWatchdog){
 
-        LedFlash(true);
         return;
     }
 
@@ -235,11 +212,25 @@ void WatchdogIntHandler(void)
     WatchdogIntClear(WATCHDOG0_BASE);
 
 
-    isErrorSys = true;
+    clearWatchdog = false;
 
 
 }
 
+
+int CrcCalc(uint8_t *data,uint32_t length)
+{
+
+
+    uint32_t crc = 0;
+    int i;
+    for(i=0; i<length; i++)
+        crc += data[i];
+
+    return crc % 256;
+
+
+}
 
 
 int main(void)
@@ -248,14 +239,13 @@ int main(void)
    FPULazyStackingEnable();
    InitialConfiguration(); // Baþlangýç ayarlarý
 
-   LedFlash(false);
 
    while(1)
    {
 
 
       LoopFunction();
-      isErrorSys = false;
+      clearWatchdog = true;
 
    }
 

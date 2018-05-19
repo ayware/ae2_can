@@ -10,39 +10,45 @@
 #define GLOBALVARIABLESEXTERN_H_
 
 
-extern uint16_t Register_Uart[UART_DATA_SIZE];
-extern uint16_t Received_Uart_Data[UART_DATA_SIZE];
+extern uint8_t Register_Uart[UART_DATA_SIZE];
+extern uint8_t Received_Uart_Data[UART_DATA_SIZE];
 extern uint8_t Register_Can[8];
 extern uint8_t Received_Can_Data[8];
-
+extern uint8_t UartPrefix[4];
 
 extern uint8_t Device_Address;
 
 
-extern uint8_t mosfetHeat1;
-extern uint8_t mosfetHeat2;
-extern uint8_t motorControllerHeat1;
-extern uint8_t motorControllerHeat2;
-extern uint8_t speedMotor1;
-extern uint8_t speedMotor2;
+extern uint8_t mosfetHeat;
+extern uint8_t motorControllerHeat;
+extern uint8_t speedMotor;
+extern uint8_t speedWheel;
 
 extern uint32_t period;
 extern float speed;
 extern int statBreak;
 extern int statDeadSwitch;
 extern uint32_t motorEncoder;
+extern uint32_t wheelEncoder;
+extern uint32_t wheelEncoder;
+
 extern uint32_t speedValue;
+extern uint32_t maxSpeed;
+extern uint32_t minSpeed;
+extern float errSpeed;
 
 
-extern uint8_t BatteryCurrent1;
-extern uint8_t BatteryCurrent2;
-extern uint8_t BatteryVoltage1;
-extern uint8_t BatteryVoltage2;
-extern uint8_t BatteryHeat1;
-extern uint8_t BatteryHeat2;
+extern uint8_t batteryCurrent1;
+extern uint8_t batteryCurrent2;
 
+extern uint8_t batteryVoltage1;
+extern uint8_t batteryVoltage2;
+
+extern uint8_t batteryHeat;
 
 extern uint32_t counter;
+
+extern uint32_t crc;
 
 
 extern bool isRxFlag;
@@ -63,24 +69,22 @@ extern uint32_t loopCounter;
 extern float mVoltage;
 
 extern uint32_t ui32C;
-extern uint32_t lastEncoder;
-extern uint32_t curEncoder;
+extern uint32_t lastMotorEncoder;
+extern uint32_t lastWheelEncoder;
+extern uint32_t curWheelEncoder;
+extern uint32_t curMotorEncoder;
 extern uint32_t analogValues[4];
-extern uint32_t wheelCounter;
 extern uint32_t mSeconds;
-extern bool isErrorSys;
+extern bool clearWatchdog;
 
 extern void SysTickIntHandler(void);
 extern void CANIntHandler(void);
 extern void InitialConfiguration(void);
 extern void CanInit (void);
-extern void CanPacketEvaluate(void);
 extern void CanWrite (uint8_t category,uint8_t fromAddress,uint8_t toAddress,uint8_t *dataAddress);
 extern void UartInit(void);
-extern void UartReceived(void);
 extern void ADCInit(int address);
 extern void GetADCResults (void);
-extern void LedFlash(bool value);
 extern void PortEIntHandler(void);
 extern void PortCIntHandler(void);
 extern void MotorDrive(float speed);
@@ -89,6 +93,8 @@ extern void TimerTick(void);
 extern void LoopFunction(void);
 extern void CanReceived(void);
 extern void WatchdogIntHandler(void);
+extern int SpeedControl(void);
+extern int CrcCalc(uint8_t *data,uint32_t length);
 
 
 #endif /* GLOBALVARIABLESEXTERN_H_ */

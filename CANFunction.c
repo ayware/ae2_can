@@ -91,7 +91,6 @@ CANIntHandler(void)
 
         canRxMessage.pui8MsgData = (uint8_t *)&Received_Can_Data[0];
         CANMessageGet(CAN0_BASE,CAN_RX_OBJECT_ID, &canRxMessage, 0);
-        CANIntClear(CAN0_BASE, 1);
 
         canCategory = canRxMessage.ui32MsgID >> 16;
         canAddressFrom = (canRxMessage.ui32MsgID >> 8) & 0x00000007;
@@ -105,9 +104,6 @@ CANIntHandler(void)
 
     else if(canStatus == 2)
     {
-
-
-        CANIntClear(CAN0_BASE, 2); // clear interrupt
         isErrFlag = 0;
 
 
@@ -118,6 +114,8 @@ CANIntHandler(void)
         isErrFlag = 0;
 
     }
+
+    CANIntClear(CAN0_BASE, canStatus); // clear interrupt
 
 }
 
@@ -133,29 +131,30 @@ void CanReceived()
         if(canAddressFrom == DEVICE_RPI)
         {
 
-                if(canCategory == CATEGORY_CHECK)
+                if(canCategory == COMMAND_CHECK)
                 {
 
-                    Register_Can[0] = speedMotor1;
-                    Register_Can[1] = speedMotor2;
-                    Register_Can[2] = motorEncoder;
-                    Register_Can[3] = motorControllerHeat1;
-                    Register_Can[4] = motorControllerHeat2;
-                    Register_Can[5] = mosfetHeat1;
-                    Register_Can[6] = mosfetHeat2;
-                    Register_Can[7] = 1;
 
-                    CanWrite(CATEGORY_CHECK, DEVICE_MOTOR, DEVICE_RPI, &Register_Can[0]);
+                    Register_Can[0] = speedMotor;
+                    Register_Can[1] = speedWheel;
+                    Register_Can[2] = motorControllerHeat;
+                    Register_Can[3] = mosfetHeat;
+                    Register_Can[4] = 0;
+                    Register_Can[5] = 0;
+                    Register_Can[6] = 0;
+                    Register_Can[7] = 0;
+
+                    CanWrite(COMMAND_CHECK, DEVICE_MOTOR, DEVICE_RPI, &Register_Can[0]);
 
                 }
-                else if(canCategory == CATEGORY_SPEED)
+                else if(canCategory == COMMAND_SPEED)
                 {
 
                     statBreak = Received_Can_Data[0];
                     statDeadSwitch = Received_Can_Data[1];
                     speedValue = Received_Can_Data[2];
 
-                    speed = period*speedValue/SPEED_LIMIT;
+                    speed = period*speedValue/SPEED_VALUE_LIMIT;
 
                     if(speed == period)
                         speed = period - 1;
@@ -176,19 +175,19 @@ void CanReceived()
         {
 
 
-            if(canCategory == CATEGORY_CHECK)
+            if(canCategory == COMMAND_CHECK)
             {
 
-                Register_Can[0] = BatteryCurrent1;
-                Register_Can[1] = BatteryCurrent2;
-                Register_Can[2] = BatteryVoltage1;
-                Register_Can[3] = BatteryVoltage2;
-                Register_Can[4] = BatteryHeat1;
-                Register_Can[5] = BatteryHeat2;
-                Register_Can[6] = 1;
+                Register_Can[0] = batteryCurrent1;
+                Register_Can[1] = batteryCurrent2;
+                Register_Can[2] = batteryVoltage1;
+                Register_Can[3] = batteryVoltage2;
+                Register_Can[4] = batteryHeat;
+                Register_Can[5] = 0;
+                Register_Can[6] = 0;
+                Register_Can[7] = 0;
 
-
-                CanWrite(CATEGORY_CHECK, DEVICE_BMS, DEVICE_RPI, &Register_Can[0]);
+                CanWrite(COMMAND_CHECK, DEVICE_BMS, DEVICE_RPI, &Register_Can[0]);
 
 
             }
@@ -205,18 +204,15 @@ void CanReceived()
         if(canAddressFrom == DEVICE_MOTOR)
         {
 
-            if(canCategory == CATEGORY_CHECK)
+            if(canCategory == COMMAND_CHECK)
             {
 
-                Register_Uart[0] = Received_Can_Data[0];
-                Register_Uart[1] = Received_Can_Data[1];
-                Register_Uart[2] = Received_Can_Data[2];
-                Register_Uart[3] = Received_Can_Data[3];
-                Register_Uart[4] = Received_Can_Data[4];
-                Register_Uart[5] = Received_Can_Data[5];
-                Register_Uart[6] = Received_Can_Data[6];
+                Register_Uart[0] = Received_Can_Data[0]; // speedMotor
+                Register_Uart[1] = Received_Can_Data[1]; // speedWheel
+                Register_Uart[2] = Received_Can_Data[2]; // motorControllerHeat
+                Register_Uart[3] = Received_Can_Data[3]; // mosfetHeat
 
-                Register_Uart[16] = 1;
+                Register_Uart[4] = 1; // Cihaz baðlý bilgisi
 
             }
 
@@ -225,14 +221,13 @@ void CanReceived()
         else if(canAddressFrom == DEVICE_BMS)
         {
 
-                Register_Uart[7] = Received_Can_Data[0];
-                Register_Uart[8] = Received_Can_Data[1];
-                Register_Uart[9] = Received_Can_Data[2];
-                Register_Uart[10] = Received_Can_Data[3];
-                Register_Uart[11] = Received_Can_Data[4];
-                Register_Uart[12] = Received_Can_Data[5];
+                Register_Uart[5] = Received_Can_Data[0]; // batteryCurrent1
+                Register_Uart[6] = Received_Can_Data[1]; // batteryCurrent2
+                Register_Uart[7] = Received_Can_Data[2]; // batteryVoltage1
+                Register_Uart[8] = Received_Can_Data[3]; // batteryVoltage2
+                Register_Uart[9] = Received_Can_Data[4]; // batteryHeat
 
-                Register_Uart[17] = 1;
+                Register_Uart[10] = 1; // Cihaz baðlý bilgisi
 
         }
 

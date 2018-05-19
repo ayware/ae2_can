@@ -24,9 +24,9 @@
 
 #define ACK 0x55
 #define NACK 0xAA
-#define CATEGORY_STOP 0x00
-#define CATEGORY_SPEED 0x01
-#define CATEGORY_CHECK 0x02
+#define COMMAND_STOP 0x00
+#define COMMAND_SPEED 0x01
+#define COMMAND_CHECK 0x02
 
 #define DEVICE_MOTOR 0x00
 #define DEVICE_RPI  0x01
@@ -36,8 +36,29 @@
 #define DELAY_CAN_WRITE 3
 #define CAN_RX_OBJECT_ID 1
 #define CAN_TX_OBJECT_ID 2
-#define SPEED_LIMIT 10
 
+#define SPEED_VALUE_LIMIT 10
+#define SPEED_MAX 35
+#define KP 0.03
+#define KI 0.04
+
+
+enum COMMAND
+{
+
+    COMMAND_DATA_CHECKER
+
+
+};
+
+
+enum COMMAND_TYPE
+{
+
+    COMMAND_TYPE_DATA_REQUEST,
+    COMMAND_TYPE_DATA_RESPONSE
+
+};
 
 
 #endif /* GLOBALDEFINES_H_ */

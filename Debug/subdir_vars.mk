@@ -9,56 +9,57 @@ CMD_SRCS += \
 ../tm4c1231d5pm.cmd 
 
 C_SRCS += \
-../ADC_Function.c \
-../CAN_Function.c \
+../ADCFunction.c \
+../CANFunction.c \
 ../InitialConfiguration.c \
-../Loop_Functions.c \
-../UART_Function.c \
+../LoopFunctions.c \
+../UARTFunction.c \
 ../main.c \
 ../tm4c1231d5pm_startup_ccs.c 
 
 C_DEPS += \
-./ADC_Function.d \
-./CAN_Function.d \
+./ADCFunction.d \
+./CANFunction.d \
 ./InitialConfiguration.d \
-./Loop_Functions.d \
-./UART_Function.d \
+./LoopFunctions.d \
+./UARTFunction.d \
 ./main.d \
 ./tm4c1231d5pm_startup_ccs.d 
 
 OBJS += \
-./ADC_Function.obj \
-./CAN_Function.obj \
+./ADCFunction.obj \
+./CANFunction.obj \
 ./InitialConfiguration.obj \
-./Loop_Functions.obj \
-./UART_Function.obj \
+./LoopFunctions.obj \
+./UARTFunction.obj \
 ./main.obj \
 ./tm4c1231d5pm_startup_ccs.obj 
 
 OBJS__QUOTED += \
-"ADC_Function.obj" \
-"CAN_Function.obj" \
+"ADCFunction.obj" \
+"CANFunction.obj" \
 "InitialConfiguration.obj" \
-"Loop_Functions.obj" \
-"UART_Function.obj" \
+"LoopFunctions.obj" \
+"UARTFunction.obj" \
 "main.obj" \
 "tm4c1231d5pm_startup_ccs.obj" 
 
 C_DEPS__QUOTED += \
-"ADC_Function.d" \
-"CAN_Function.d" \
+"ADCFunction.d" \
+"CANFunction.d" \
 "InitialConfiguration.d" \
-"Loop_Functions.d" \
-"UART_Function.d" \
+"LoopFunctions.d" \
+"UARTFunction.d" \
 "main.d" \
 "tm4c1231d5pm_startup_ccs.d" 
 
 C_SRCS__QUOTED += \
-"../ADC_Function.c" \
-"../CAN_Function.c" \
+"../ADCFunction.c" \
+"../CANFunction.c" \
 "../InitialConfiguration.c" \
-"../Loop_Functions.c" \
-"../UART_Function.c" \
+"../LoopFunctions.c" \
+"../UARTFunction.c" \
+"../main.c" \
 "../tm4c1231d5pm_startup_ccs.c" 
 
 

@@ -42,6 +42,7 @@ void InitMotorPwm(){
     period = SysCtlClockGet() / (100000/9);
     //Period = 250/18;
 
+
     GPIOPinConfigure(GPIO_PC6_WT1CCP0);
     GPIOPinConfigure(GPIO_PC7_WT1CCP1);
     GPIOPinTypeTimer(GPIO_PORTC_BASE,GPIO_PIN_6 | GPIO_PIN_7);
@@ -53,6 +54,8 @@ void InitMotorPwm(){
     TimerLoadSet(WTIMER1_BASE, TIMER_B, period);
 
     MotorStop();
+
+
 
     TimerEnable(WTIMER1_BASE, TIMER_A);
     TimerEnable(WTIMER1_BASE, TIMER_B);
@@ -186,13 +189,11 @@ void InitialConfiguration()
         SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC0); // ADC0 modulü aktif edildi
 
         // Port E conf.
-        GPIOPinTypeGPIOInput(GPIO_PORTE_BASE ,GPIO_PIN_3); // Sýcaklýk pini input edildi
-        GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_1); // Giriþler analog set edildi
+        GPIOPinTypeGPIOInput(GPIO_PORTE_BASE ,GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3);
+        GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3);
 
-        // Port C conf.
-        GPIOPinTypeGPIOInput(GPIO_PORTC_BASE, GPIO_PIN_1 | GPIO_PIN_2); // Akým,voltage pinleri input edildi
-
-
+        //Port C
+        GPIOPinTypeGPIOInput(GPIO_PORTC_BASE,GPIO_PIN_4 | GPIO_PIN_5);
 
         ADCInit(DEVICE_BMS); // ADC init yapýldý
 

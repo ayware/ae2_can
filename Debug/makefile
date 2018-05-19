@@ -10,11 +10,11 @@ GEN_OPTS__FLAG :=
 GEN_CMDS__FLAG := 
 
 ORDERED_OBJS += \
-"./ADC_Function.obj" \
-"./CAN_Function.obj" \
+"./ADCFunction.obj" \
+"./CANFunction.obj" \
 "./InitialConfiguration.obj" \
-"./Loop_Functions.obj" \
-"./UART_Function.obj" \
+"./LoopFunctions.obj" \
+"./UARTFunction.obj" \
 "./main.obj" \
 "./tm4c1231d5pm_startup_ccs.obj" \
 "../tm4c1231d5pm.cmd" \
@@ -163,8 +163,8 @@ Ae2Can.bin: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "ADC_Function.obj" "CAN_Function.obj" "InitialConfiguration.obj" "Loop_Functions.obj" "UART_Function.obj" "main.obj" "tm4c1231d5pm_startup_ccs.obj" 
-	-$(RM) "ADC_Function.d" "CAN_Function.d" "InitialConfiguration.d" "Loop_Functions.d" "UART_Function.d" "main.d" "tm4c1231d5pm_startup_ccs.d" 
+	-$(RM) "ADCFunction.obj" "CANFunction.obj" "InitialConfiguration.obj" "LoopFunctions.obj" "UARTFunction.obj" "main.obj" "tm4c1231d5pm_startup_ccs.obj" 
+	-$(RM) "ADCFunction.d" "CANFunction.d" "InitialConfiguration.d" "LoopFunctions.d" "UARTFunction.d" "main.d" "tm4c1231d5pm_startup_ccs.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 

@@ -40,12 +40,14 @@ void ADCInit (int address)
 {
     if(address == DEVICE_BMS)
     {
-        ADCSequenceDisable(ADC0_BASE, 1); //Sample Sequencer 1 ile iþlem yapacaðýmýz için öncelikle kapatýyoruz.
+
+        ADCHardwareOversampleConfigure(ADC0_BASE, 64);
+        ADCSequenceDisable(ADC0_BASE, 1);
         ADCSequenceConfigure(ADC0_BASE, 1, ADC_TRIGGER_PROCESSOR, 0);
-        ADCSequenceStepConfigure(ADC0_BASE, 1, 0, ADC_CTL_CH0); //Sequencer Adým 0 : PE3
-        ADCSequenceStepConfigure(ADC0_BASE, 1, 1, ADC_CTL_CH1); //Sequencer Adým 1 : PE2
-        ADCSequenceStepConfigure(ADC0_BASE, 1, 2, ADC_CTL_CH2); //Sequencer Adým 2 : PE1
-        ADCSequenceStepConfigure(ADC0_BASE, 1, 3, ADC_CTL_TS | ADC_CTL_IE | ADC_CTL_END); //Sequencer Adým 3 : Sýcaklýk sensörünün deðeri ve
+        ADCSequenceStepConfigure(ADC0_BASE, 1, 0, ADC_CTL_CH0);
+        ADCSequenceStepConfigure(ADC0_BASE, 1, 1, ADC_CTL_CH1);
+        ADCSequenceStepConfigure(ADC0_BASE, 1, 2, ADC_CTL_CH2);
+        ADCSequenceStepConfigure(ADC0_BASE, 1, 3, ADC_CTL_TS | ADC_CTL_IE | ADC_CTL_END);
         ADCSequenceEnable(ADC0_BASE, 1);
         ADCIntClear(ADC0_BASE, 1);
 
@@ -53,10 +55,10 @@ void ADCInit (int address)
     else if(address == DEVICE_MOTOR)
     {
 
+        ADCHardwareOversampleConfigure(ADC0_BASE, 64);
         ADCSequenceDisable(ADC0_BASE, 3);
         ADCSequenceConfigure(ADC0_BASE, 3, ADC_TRIGGER_PROCESSOR, 0);
-        ADCSequenceStepConfigure(ADC0_BASE, 3, 0, ADC_CTL_CH0);
-        ADCSequenceStepConfigure(ADC0_BASE, 3, 3, ADC_CTL_TS | ADC_CTL_IE | ADC_CTL_END); // final sequence config edildi
+        ADCSequenceStepConfigure(ADC0_BASE, 3, 0, ADC_CTL_CH0 | ADC_CTL_IE | ADC_CTL_END);
         ADCSequenceEnable(ADC0_BASE, 3);
         ADCIntClear(ADC0_BASE, 3);
 
@@ -77,17 +79,24 @@ void GetADCResults (void)
        {
 
 
+
            ADCProcessorTrigger(ADC0_BASE, 1);
            while(!ADCIntStatus(ADC0_BASE, 1, false));
            ADCIntClear(ADC0_BASE, 1);
            ADCSequenceDataGet(ADC0_BASE, 1, analogValues);
 
+           mosfetHeat = ((255/4096)*analogValues[0]);
 
-          mosfetHeat1 = (uint8_t) (analogValues[0] & 0x00FF);
-          mosfetHeat2 = (uint8_t) ((analogValues[0] >> 8) & 0x00FF);
+           uint16_t voltage = ( (analogValues[2] / (float)(870/13)) * 10 );
 
-          motorControllerHeat1 = (uint8_t) (analogValues[3] & 0x00FF);
-          motorControllerHeat2 = (uint8_t) ((analogValues[3] >> 8) & 0x00FF);
+           batteryVoltage1 = (voltage >> 8)&0xFF;
+           batteryVoltage2 = (voltage)&0xFF;
+
+           uint16_t current = ( (analogValues[1] / (float)(1000/0.09)) * 10 );
+
+           batteryCurrent1 = (current >> 8)&0xFF;
+           batteryCurrent2 = (current)&0xFF;
+
 
 
        }
@@ -99,9 +108,8 @@ void GetADCResults (void)
            ADCIntClear(ADC0_BASE, 3);
            ADCSequenceDataGet(ADC0_BASE, 3, analogValues);
 
+           motorControllerHeat = (uint8_t)(255/4096)*(analogValues[0]);
 
-           BatteryVoltage1 = (uint8_t)( analogValues[2] / (float)(870/13) );
-           BatteryCurrent1 = (uint8_t)( analogValues[1] / (float)(1000/0.09) );
 
 
        }
@@ -109,3 +117,6 @@ void GetADCResults (void)
 
 
 }
+
+
+

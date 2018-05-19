@@ -45,20 +45,20 @@ void LoopFunction(void)
     {
 
 
-        Register_Uart[13] = statBreak;
-        Register_Uart[14] = statDeadSwitch;
-        Register_Uart[15] = speedValue;
+        Register_Uart[11] = statBreak;
+        Register_Uart[12] = statDeadSwitch;
+        Register_Uart[13] = speedValue;
 
         Register_Can[0] = statBreak;
         Register_Can[1] = statDeadSwitch;
         Register_Can[2] = speedValue;
 
         // Motor kartýna speed,break,deadSwitch bilgilerini yolluyor
-        CanWrite(CATEGORY_SPEED, DEVICE_RPI, DEVICE_MOTOR,&Register_Can[0]);
+        CanWrite(COMMAND_SPEED, DEVICE_RPI, DEVICE_MOTOR,&Register_Can[0]);
 
         // RPI den diðer kartlara istek yolluyor
-        CanWrite(CATEGORY_CHECK,DEVICE_RPI,DEVICE_BMS,&Register_Can[0]);
-        CanWrite(CATEGORY_CHECK,DEVICE_RPI,DEVICE_MOTOR,&Register_Can[0]);
+        CanWrite(COMMAND_CHECK,DEVICE_RPI,DEVICE_BMS,&Register_Can[0]);
+        CanWrite(COMMAND_CHECK,DEVICE_RPI,DEVICE_MOTOR,&Register_Can[0]);
 
 
 
@@ -66,7 +66,8 @@ void LoopFunction(void)
     else if(Device_Address == DEVICE_MOTOR)
     {
 
-        motorEncoder = curEncoder * 0.385;
+        speedWheel = curWheelEncoder * 0.385;
+        speedMotor = curMotorEncoder * 0.385;
 
         if(statBreak || !statDeadSwitch)
             MotorStop();
@@ -103,8 +104,13 @@ void MotorDrive(float motorSpeed){
 
       // Period-1 motoru durduruyor
 
-     TimerMatchSet(WTIMER1_BASE, TIMER_A, period - motorSpeed);
-     TimerMatchSet(WTIMER1_BASE, TIMER_B, period - motorSpeed);
+    float actualProportion = SPEED_MAX / SPEED_VALUE_LIMIT;
+    float actualSpeed = speedValue * actualProportion;
+    errSpeed = actualSpeed - speedWheel;
+
+
+    TimerMatchSet(WTIMER1_BASE, TIMER_A, period - motorSpeed);
+    TimerMatchSet(WTIMER1_BASE, TIMER_B, period - motorSpeed);
 
 }
 
@@ -113,8 +119,8 @@ void MotorDrive(float motorSpeed){
 void MotorStop(){
 
 
-       TimerMatchSet(WTIMER1_BASE, TIMER_A, period - 1);
-       TimerMatchSet(WTIMER1_BASE, TIMER_B, period - 1);
+    TimerMatchSet(WTIMER1_BASE, TIMER_A, period - 1);
+    TimerMatchSet(WTIMER1_BASE, TIMER_B, period - 1);
 
 }
 
