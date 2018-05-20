@@ -39,8 +39,8 @@
 
 #define SPEED_VALUE_LIMIT 10
 #define SPEED_MAX 35
-#define KP 0.03
-#define KI 0.04
+#define KP 0.5
+#define KI 0.45
 
 
 enum COMMAND

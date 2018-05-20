@@ -45,23 +45,34 @@ void UartInit(void)
 
     SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0); // Uart modülü aktif edildi
 
-
     GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);
-    IntEnable(INT_UART0); //enable the UART interrupt
-    UARTIntEnable(UART0_BASE, UART_INT_RX | UART_INT_RT);
-    UARTFIFOEnable(UART0_BASE);
 
+
+    IntDisable(INT_UART0);
+    UARTDisable(UART0_BASE);
+    UARTClockSourceSet(UART0_BASE, UART_CLOCK_SYSTEM);
     UARTConfigSetExpClk(UART0_BASE, SysCtlClockGet(), 115200,(UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE));     // Uart hýzý 115200 rpi dede ayný hýz olmalý
+   // UARTFIFOEnable(UART0_BASE);
+    UARTIntEnable(UART0_BASE,UART_INT_RX | UART_INT_RT);
+    UARTEnable(UART0_BASE);
 
+    IntEnable(INT_UART0); //enable the UART interrupt
 }
+
+
 
 
 void UARTIntHandler(void)
 {
 
+
+    // 100 ms de bir tetikleniyor. Bu süre rpi de ayarlanýyor.
+
     uint32_t uartStatus;
     uartStatus = UARTIntStatus(UART0_BASE, true);
     UARTIntClear(UART0_BASE, uartStatus);
+
+
 
 
     if(!UARTCharsAvail(UART0_BASE))
@@ -76,6 +87,7 @@ void UARTIntHandler(void)
         return;
 
     int32_t command = UARTCharGetNonBlocking(UART0_BASE);
+
 
     switch(command){
 
@@ -94,7 +106,8 @@ void UARTIntHandler(void)
             uint32_t i = 0;
             crc = 0;
 
-            uint32_t DATA_LENGTH = 14;
+
+            uint32_t DATA_LENGTH = 21;
 
 
             UartPrefix[0] = ACK;
@@ -114,6 +127,7 @@ void UARTIntHandler(void)
 
             crc %= 256;
 
+
             // Prefix yollandý
             for(i = 0; i < 4; i++)
                 UARTCharPutNonBlocking(UART0_BASE,UartPrefix[i]);
@@ -132,10 +146,11 @@ void UARTIntHandler(void)
 
                 loopCounter = 0;
 
-                Register_Uart[4] = 0;
-                Register_Uart[10] = 0;
+                Register_Uart[8] = 0;
+                Register_Uart[17] = 0;
 
             }
+
 
 
 
@@ -146,6 +161,7 @@ void UARTIntHandler(void)
 
 
     }
+
 
 
 }

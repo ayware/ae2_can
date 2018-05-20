@@ -45,9 +45,9 @@ void LoopFunction(void)
     {
 
 
-        Register_Uart[11] = statBreak;
-        Register_Uart[12] = statDeadSwitch;
-        Register_Uart[13] = speedValue;
+        Register_Uart[18] = statBreak;
+        Register_Uart[19] = statDeadSwitch;
+        Register_Uart[20] = speedValue;
 
         Register_Can[0] = statBreak;
         Register_Can[1] = statDeadSwitch;
@@ -108,9 +108,28 @@ void MotorDrive(float motorSpeed){
     float actualSpeed = speedValue * actualProportion;
     errSpeed = actualSpeed - speedWheel;
 
+    float P = errSpeed * KP;
+    float I = errSpeed * KI;
 
-    TimerMatchSet(WTIMER1_BASE, TIMER_A, period - motorSpeed);
-    TimerMatchSet(WTIMER1_BASE, TIMER_B, period - motorSpeed);
+    speedResult = P + I;
+
+    if(speedResult < 0)
+        MotorStop();
+    else{
+
+        motorSpeed -= (period/10);
+
+        if(motorSpeed >= period)
+            motorSpeed = period - 1;
+        else if(motorSpeed < 0)
+            motorSpeed = 1;
+
+        TimerMatchSet(WTIMER1_BASE, TIMER_A, period - motorSpeed);
+        TimerMatchSet(WTIMER1_BASE, TIMER_B, period - motorSpeed);
+
+    }
+
+
 
 }
 

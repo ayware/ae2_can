@@ -19,10 +19,12 @@ extern uint8_t UartPrefix[4];
 extern uint8_t Device_Address;
 
 
-extern uint8_t mosfetHeat;
-extern uint8_t motorControllerHeat;
-extern uint8_t speedMotor;
-extern uint8_t speedWheel;
+extern uint8_t mosfetHeat1;
+extern uint8_t mosfetHeat2;
+extern uint8_t motorControllerHeat1;
+extern uint8_t motorControllerHeat2;
+extern float speedMotor;
+extern float speedWheel;
 
 extern uint32_t period;
 extern float speed;
@@ -36,7 +38,7 @@ extern uint32_t speedValue;
 extern uint32_t maxSpeed;
 extern uint32_t minSpeed;
 extern float errSpeed;
-
+extern float speedResult;
 
 extern uint8_t batteryCurrent1;
 extern uint8_t batteryCurrent2;
@@ -44,7 +46,8 @@ extern uint8_t batteryCurrent2;
 extern uint8_t batteryVoltage1;
 extern uint8_t batteryVoltage2;
 
-extern uint8_t batteryHeat;
+extern uint8_t batteryHeat1;
+extern uint8_t batteryHeat2;
 
 extern uint32_t counter;
 

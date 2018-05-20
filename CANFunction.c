@@ -137,10 +137,10 @@ void CanReceived()
 
                     Register_Can[0] = speedMotor;
                     Register_Can[1] = speedWheel;
-                    Register_Can[2] = motorControllerHeat;
-                    Register_Can[3] = mosfetHeat;
-                    Register_Can[4] = 0;
-                    Register_Can[5] = 0;
+                    Register_Can[2] = motorControllerHeat1;
+                    Register_Can[3] = motorControllerHeat1;
+                    Register_Can[4] = mosfetHeat1;
+                    Register_Can[5] = mosfetHeat2;
                     Register_Can[6] = 0;
                     Register_Can[7] = 0;
 
@@ -182,8 +182,8 @@ void CanReceived()
                 Register_Can[1] = batteryCurrent2;
                 Register_Can[2] = batteryVoltage1;
                 Register_Can[3] = batteryVoltage2;
-                Register_Can[4] = batteryHeat;
-                Register_Can[5] = 0;
+                Register_Can[4] = batteryHeat1;
+                Register_Can[5] = batteryHeat2;
                 Register_Can[6] = 0;
                 Register_Can[7] = 0;
 
@@ -209,10 +209,14 @@ void CanReceived()
 
                 Register_Uart[0] = Received_Can_Data[0]; // speedMotor
                 Register_Uart[1] = Received_Can_Data[1]; // speedWheel
-                Register_Uart[2] = Received_Can_Data[2]; // motorControllerHeat
-                Register_Uart[3] = Received_Can_Data[3]; // mosfetHeat
+                Register_Uart[2] = Received_Can_Data[2]; // motorControllerHeat1
+                Register_Uart[3] = Received_Can_Data[3]; // motorControllerHeat2
+                Register_Uart[4] = Received_Can_Data[4]; // mosfetHeat1
+                Register_Uart[5] = Received_Can_Data[5]; // mosfetHeat2
+                Register_Uart[6] = Received_Can_Data[6]; // -
+                Register_Uart[7] = Received_Can_Data[7]; // -
 
-                Register_Uart[4] = 1; // Cihaz baðlý bilgisi
+                Register_Uart[8] = 1; // Cihaz baðlý bilgisi
 
             }
 
@@ -221,13 +225,16 @@ void CanReceived()
         else if(canAddressFrom == DEVICE_BMS)
         {
 
-                Register_Uart[5] = Received_Can_Data[0]; // batteryCurrent1
-                Register_Uart[6] = Received_Can_Data[1]; // batteryCurrent2
-                Register_Uart[7] = Received_Can_Data[2]; // batteryVoltage1
-                Register_Uart[8] = Received_Can_Data[3]; // batteryVoltage2
-                Register_Uart[9] = Received_Can_Data[4]; // batteryHeat
+                Register_Uart[9]  = Received_Can_Data[0]; // batteryCurrent1
+                Register_Uart[10] = Received_Can_Data[1]; // batteryCurrent2
+                Register_Uart[11] = Received_Can_Data[2]; // batteryVoltage1
+                Register_Uart[12] = Received_Can_Data[3]; // batteryVoltage2
+                Register_Uart[13] = Received_Can_Data[4]; // batteryHeat1
+                Register_Uart[14] = Received_Can_Data[5]; // batteryHeat2
+                Register_Uart[15] = Received_Can_Data[6]; // -
+                Register_Uart[16] = Received_Can_Data[7]; // -
 
-                Register_Uart[10] = 1; // Cihaz baðlý bilgisi
+                Register_Uart[17] = 1; // Cihaz baðlý bilgisi
 
         }
 

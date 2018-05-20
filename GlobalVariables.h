@@ -20,10 +20,12 @@ uint8_t UartPrefix[4];
 uint8_t Device_Address = 0;
 
 
-uint8_t mosfetHeat = 0;
-uint8_t motorControllerHeat = 0;
-uint8_t speedMotor = 0;
-uint8_t speedWheel = 0;
+uint8_t mosfetHeat1 = 0;
+uint8_t mosfetHeat2 = 0;
+uint8_t motorControllerHeat1 = 0;
+uint8_t motorControllerHeat2 = 0;
+float speedMotor = 0;
+float speedWheel = 0;
 
 uint32_t period =  0;
 float speed = 0;
@@ -36,6 +38,7 @@ uint32_t speedValue = 0;
 uint32_t maxSpeed = 0;
 uint32_t minSpeed = 0;
 float errSpeed = 0;
+float speedResult = 0;
 
 
 uint8_t batteryCurrent1 = 0;
@@ -44,7 +47,8 @@ uint8_t batteryCurrent2 = 0;
 uint8_t batteryVoltage1 = 0;
 uint8_t batteryVoltage2 = 0;
 
-uint8_t batteryHeat = 0;
+uint8_t batteryHeat1 = 0;
+uint8_t batteryHeat2 = 0;
 
 uint32_t counter = 0;
 

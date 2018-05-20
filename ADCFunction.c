@@ -85,17 +85,20 @@ void GetADCResults (void)
            ADCIntClear(ADC0_BASE, 1);
            ADCSequenceDataGet(ADC0_BASE, 1, analogValues);
 
-           mosfetHeat = ((255/4096)*analogValues[0]);
+           uint16_t mHeat = analogValues[0];
+
+           mosfetHeat1 = (mHeat>>8)&0xFF;
+           mosfetHeat2 = (mHeat>>0)&0xFF;
 
            uint16_t voltage = ( (analogValues[2] / (float)(870/13)) * 10 );
 
-           batteryVoltage1 = (voltage >> 8)&0xFF;
-           batteryVoltage2 = (voltage)&0xFF;
+           batteryVoltage1 = (voltage>>8)&0xFF;
+           batteryVoltage2 = (voltage>>0)&0xFF;
 
            uint16_t current = ( (analogValues[1] / (float)(1000/0.09)) * 10 );
 
-           batteryCurrent1 = (current >> 8)&0xFF;
-           batteryCurrent2 = (current)&0xFF;
+           batteryCurrent1 = (current>>8)&0xFF;
+           batteryCurrent2 = (current>>0)&0xFF;
 
 
 
@@ -108,7 +111,13 @@ void GetADCResults (void)
            ADCIntClear(ADC0_BASE, 3);
            ADCSequenceDataGet(ADC0_BASE, 3, analogValues);
 
-           motorControllerHeat = (uint8_t)(255/4096)*(analogValues[0]);
+           uint32_t controllerHeatValue = analogValues[0];
+           uint32_t temp = ( 147.5 - ((75*(3.3)*controllerHeatValue)/4096) ) * 10;
+
+
+           motorControllerHeat1 = (temp>>8)&0xFF;
+           motorControllerHeat2 = (temp>>0)&0xFF;
+
 
 
 
