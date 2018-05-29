@@ -73,9 +73,10 @@ TimerTick(void)
     mSeconds++;
 
     curWheelEncoder = wheelEncoder - lastWheelEncoder;
-    curMotorEncoder = motorEncoder - lastMotorEncoder;
-
     lastWheelEncoder = curWheelEncoder;
+
+
+    curMotorEncoder = motorEncoder - lastMotorEncoder;
     lastMotorEncoder = curMotorEncoder;
 
 
@@ -114,13 +115,6 @@ PortEIntHandler(void)
         }
 
 
-
-
-    }
-
-
-    if(Device_Address == DEVICE_BMS)
-    {
 
 
     }
@@ -199,7 +193,8 @@ PortCIntHandler(void)
 
 
 
-void WatchdogIntHandler(void)
+void
+WatchdogIntHandler(void)
 {
 
     if(!clearWatchdog){
@@ -223,6 +218,7 @@ int CrcCalc(uint8_t *data,uint32_t length)
 
 
     uint32_t crc = 0;
+
     int i;
     for(i=0; i<length; i++)
         crc += data[i];
@@ -234,10 +230,28 @@ int CrcCalc(uint8_t *data,uint32_t length)
 
 
 int main(void)
+
 {
-   FPUEnable();
-   FPULazyStackingEnable();
-   InitialConfiguration(); // Baþlangýç ayarlarý
+
+    //SysCtlClockSet( SYSCTL_SYSDIV_2_5 | SYSCTL_USE_PLL | SYSCTL_XTAL_16MHZ | SYSCTL_OSC_MAIN);//SYSCTL_SYSDIV_5 - 40MHz//SYSCTL_SYSDIV_2_5 80MHz
+    //SYSCTL_SYSDIV_5 - 40MHz//SYSCTL_SYSDIV_2_5 80MHz // SYSCTL_SYSDIV_8 25Mhz
+    SysCtlClockSet( SYSCTL_SYSDIV_8 | SYSCTL_USE_PLL | SYSCTL_XTAL_16MHZ | SYSCTL_OSC_MAIN);
+
+    SysTickPeriodSet(25); // System periodu set edildi
+
+    FPUEnable();
+    FPULazyStackingEnable();
+
+    // Kart Adresi Alýndý
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD);
+    GPIOPinTypeGPIOInput(GPIO_PORTD_BASE, SW1 | SW2 | SW3 | SW4); // adresleme pinleri input yapýldý
+    Device_Address =~ (0xFFFFFFF0|GPIOPinRead(GPIO_PORTD_BASE,SW1|SW2|SW3|SW4));
+
+    EnablePeriph(); // All eripherals enabled
+
+    WatchdogInit(); // WatchdogTimer enabled
+
+    InitialConfiguration(); // Baþlangýç ayarlarý
 
 
    while(1)

@@ -45,9 +45,11 @@ void LoopFunction(void)
     {
 
 
+
         Register_Uart[18] = statBreak;
         Register_Uart[19] = statDeadSwitch;
         Register_Uart[20] = speedValue;
+
 
         Register_Can[0] = statBreak;
         Register_Can[1] = statDeadSwitch;
@@ -92,6 +94,7 @@ void LoopFunction(void)
         {
             counter = 0;
             GetADCResults();
+
         }
 
     }
@@ -102,34 +105,13 @@ void LoopFunction(void)
 void MotorDrive(float motorSpeed){
 
 
-      // Period-1 motoru durduruyor
+    TimerMatchSet(WTIMER1_BASE, TIMER_A, period - motorSpeed);
+    TimerMatchSet(WTIMER1_BASE, TIMER_B, period - motorSpeed);
 
-    float actualProportion = SPEED_MAX / SPEED_VALUE_LIMIT;
-    float actualSpeed = speedValue * actualProportion;
-    errSpeed = actualSpeed - speedWheel;
-
-    float P = errSpeed * KP;
-    float I = errSpeed * KI;
-
-    speedResult = P + I;
-
-    if(speedResult < 0)
-        MotorStop();
-    else{
-
-        motorSpeed -= (period/10);
-
-        if(motorSpeed >= period)
-            motorSpeed = period - 1;
-        else if(motorSpeed < 0)
-            motorSpeed = 1;
-
-        TimerMatchSet(WTIMER1_BASE, TIMER_A, period - motorSpeed);
-        TimerMatchSet(WTIMER1_BASE, TIMER_B, period - motorSpeed);
-
-    }
-
-
+    if( (period - motorSpeed) == (period - 1))
+        isMotorRun = false;
+    else
+        isMotorRun = true;
 
 }
 
@@ -140,6 +122,8 @@ void MotorStop(){
 
     TimerMatchSet(WTIMER1_BASE, TIMER_A, period - 1);
     TimerMatchSet(WTIMER1_BASE, TIMER_B, period - 1);
+
+    isMotorRun = false;
 
 }
 

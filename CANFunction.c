@@ -47,8 +47,6 @@ void CanInit (void)
 
 	GPIOPinTypeCAN(GPIO_PORTB_BASE, GPIO_PIN_4 | GPIO_PIN_5); // can çýkýþlarýný b portuna yönlendiriyor
 
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_CAN0); // can çýkýþlarýný aktif ediyor.
-
     CANInit(CAN0_BASE); // Can0 modülünü kullanýdýðýný belli ediyor
 
 	//CANBitRateSet(CAN0_BASE, SysCtlClockGet(), 500000);
@@ -135,14 +133,17 @@ void CanReceived()
                 {
 
 
+
                     Register_Can[0] = speedMotor;
                     Register_Can[1] = speedWheel;
                     Register_Can[2] = motorControllerHeat1;
-                    Register_Can[3] = motorControllerHeat1;
+                    Register_Can[3] = motorControllerHeat2;
                     Register_Can[4] = mosfetHeat1;
                     Register_Can[5] = mosfetHeat2;
-                    Register_Can[6] = 0;
+                    Register_Can[6] = isMotorRun;
                     Register_Can[7] = 0;
+
+
 
                     CanWrite(COMMAND_CHECK, DEVICE_MOTOR, DEVICE_RPI, &Register_Can[0]);
 
@@ -154,7 +155,7 @@ void CanReceived()
                     statDeadSwitch = Received_Can_Data[1];
                     speedValue = Received_Can_Data[2];
 
-                    speed = period*speedValue/SPEED_VALUE_LIMIT;
+                    speed = (float)period*((float)speedValue/(float)SPEED_VALUE_LIMIT);
 
                     if(speed == period)
                         speed = period - 1;
@@ -178,6 +179,7 @@ void CanReceived()
             if(canCategory == COMMAND_CHECK)
             {
 
+
                 Register_Can[0] = batteryCurrent1;
                 Register_Can[1] = batteryCurrent2;
                 Register_Can[2] = batteryVoltage1;
@@ -186,6 +188,7 @@ void CanReceived()
                 Register_Can[5] = batteryHeat2;
                 Register_Can[6] = 0;
                 Register_Can[7] = 0;
+
 
                 CanWrite(COMMAND_CHECK, DEVICE_BMS, DEVICE_RPI, &Register_Can[0]);
 
@@ -213,10 +216,12 @@ void CanReceived()
                 Register_Uart[3] = Received_Can_Data[3]; // motorControllerHeat2
                 Register_Uart[4] = Received_Can_Data[4]; // mosfetHeat1
                 Register_Uart[5] = Received_Can_Data[5]; // mosfetHeat2
-                Register_Uart[6] = Received_Can_Data[6]; // -
+                Register_Uart[6] = Received_Can_Data[6]; // isMotorRun
                 Register_Uart[7] = Received_Can_Data[7]; // -
 
                 Register_Uart[8] = 1; // Cihaz baðlý bilgisi
+
+
 
             }
 
@@ -224,6 +229,7 @@ void CanReceived()
         }
         else if(canAddressFrom == DEVICE_BMS)
         {
+
 
                 Register_Uart[9]  = Received_Can_Data[0]; // batteryCurrent1
                 Register_Uart[10] = Received_Can_Data[1]; // batteryCurrent2
@@ -235,6 +241,8 @@ void CanReceived()
                 Register_Uart[16] = Received_Can_Data[7]; // -
 
                 Register_Uart[17] = 1; // Cihaz baðlý bilgisi
+
+
 
         }
 

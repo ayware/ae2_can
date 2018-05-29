@@ -37,26 +37,33 @@
 #include "GlobalDefines.h"
 
 
+
+
 void UartInit(void)
 {
 
     GPIOPinConfigure(GPIO_PA0_U0RX); // uart giriþleri set edildi
     GPIOPinConfigure(GPIO_PA1_U0TX); // uart giriþleri set edildi
 
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0); // Uart modülü aktif edildi
-
     GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);
-
 
     IntDisable(INT_UART0);
     UARTDisable(UART0_BASE);
     UARTClockSourceSet(UART0_BASE, UART_CLOCK_SYSTEM);
     UARTConfigSetExpClk(UART0_BASE, SysCtlClockGet(), 115200,(UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE));     // Uart hýzý 115200 rpi dede ayný hýz olmalý
-   // UARTFIFOEnable(UART0_BASE);
+    UARTFIFODisable(UART0_BASE);
+    UARTFlowControlSet(UART0_BASE, UART_FLOWCONTROL_NONE);
     UARTIntEnable(UART0_BASE,UART_INT_RX | UART_INT_RT);
     UARTEnable(UART0_BASE);
 
     IntEnable(INT_UART0); //enable the UART interrupt
+}
+
+
+void UARTSendData(uint32_t mBase,char mData){
+
+    while(!UARTCharPutNonBlocking(mBase, mData));
+
 }
 
 
@@ -68,88 +75,160 @@ void UARTIntHandler(void)
 
     // 100 ms de bir tetikleniyor. Bu süre rpi de ayarlanýyor.
 
-    uint32_t uartStatus;
-    uartStatus = UARTIntStatus(UART0_BASE, true);
-    UARTIntClear(UART0_BASE, uartStatus);
+
+    if(Device_Address == DEVICE_RPI){
 
 
 
-
-    if(!UARTCharsAvail(UART0_BASE))
-        return;
-
-    int32_t ctr = UARTCharGetNonBlocking(UART0_BASE);
-
-    if(ctr == -1 || ctr != ACK)
-        return;
-
-    if(!UARTCharsAvail(UART0_BASE))
-        return;
-
-    int32_t command = UARTCharGetNonBlocking(UART0_BASE);
+        uint32_t uartStatus;
+        uartStatus = UARTIntStatus(UART0_BASE, true);
+        UARTIntClear(UART0_BASE, uartStatus);
 
 
-    switch(command){
+        int32_t ctr = UARTCharGetNonBlocking(UART0_BASE);
 
-
-    case COMMAND_DATA_CHECKER:
-
-
-        if(!UARTCharsAvail(UART0_BASE))
+        if(ctr == -1 || ctr != ACK)
             return;
 
+        int32_t command = UARTCharGetNonBlocking(UART0_BASE);
         int32_t commandType = UARTCharGetNonBlocking(UART0_BASE);
 
-        if(commandType == COMMAND_TYPE_DATA_REQUEST)
-        {
-
-            uint32_t i = 0;
-            crc = 0;
+        switch(command){
 
 
-            uint32_t DATA_LENGTH = 21;
+            case COMMAND_DATA_CHECKER:
+
+                if(commandType == COMMAND_TYPE_DATA_REQUEST)
+                {
+
+                    uint32_t i;
+                    crc = 0;
+
+                    uint32_t DATA_LENGTH = 21;
 
 
-            UartPrefix[0] = ACK;
-            UartPrefix[1] = COMMAND_DATA_CHECKER;
-            UartPrefix[2] = COMMAND_TYPE_DATA_RESPONSE;
-            UartPrefix[3] = DATA_LENGTH;
+                    UartPrefix[0] = ACK;
+                    UartPrefix[1] = COMMAND_DATA_CHECKER;
+                    UartPrefix[2] = COMMAND_TYPE_DATA_RESPONSE;
+                    UartPrefix[3] = DATA_LENGTH;
+
+                    // Prefix crc hesaplandý;
+                    for(i=0; i<4; i++)
+                        crc += UartPrefix[i];
+
+                    // Datalar crc hesaplandý ve prefixe eklenip modlandý
+                    for(i=0; i<DATA_LENGTH; i++)
+                        crc += Register_Uart[i];
+
+                    crc %= 256;
 
 
-            // Prefix crc hesaplandý;
+                    // Prefix yollandý
+                    for(i = 0; i < 4; i++){
 
-            for(i=0; i<4; i++)
-                crc += UartPrefix[i];
-
-            // Datalar crc hesaplandý ve prefixe eklenip modlandý
-            for(i=0; i<DATA_LENGTH; i++)
-                crc += Register_Uart[i];
-
-            crc %= 256;
+                        UARTSendData(UART0_BASE,UartPrefix[i]);
 
 
-            // Prefix yollandý
-            for(i = 0; i < 4; i++)
-                UARTCharPutNonBlocking(UART0_BASE,UartPrefix[i]);
-
-            // Datalar yollandý
-            for(i = 0; i < DATA_LENGTH; i++)
-                UARTCharPutNonBlocking(UART0_BASE,Register_Uart[i]);
+                    }
 
 
-            // Crc yollandý
-            UARTCharPutNonBlocking(UART0_BASE,crc);
+                    // Datalar yollandý
+                    for(i = 0; i < DATA_LENGTH; i++){
+
+                        UARTSendData(UART0_BASE,Register_Uart[i]);
+
+                    }
 
 
-            loopCounter++;
-            if(loopCounter == 3){ // 300 ms
+                    // Crc yollandý
 
-                loopCounter = 0;
+                    UARTSendData(UART0_BASE, crc);
 
-                Register_Uart[8] = 0;
-                Register_Uart[17] = 0;
+
+
+                    loopCounter++;
+                    if(loopCounter == 3){ // 300 ms
+
+                        loopCounter = 0;
+
+                        Register_Uart[8] = 0;
+                        Register_Uart[17] = 0;
+
+                    }
+
+
+
+
+                }
+
+
+
+                break;
+
+
+    }
+
+
+    }else if(Device_Address == DEVICE_BMS){
+
+
+        uint32_t uartStatus;
+        uartStatus = UARTIntStatus(UART0_BASE, true);
+        UARTIntClear(UART0_BASE, uartStatus);
+
+        while(!UARTCharsAvail(UART0_BASE)){};
+        int32_t ack = UARTCharGetNonBlocking(UART0_BASE);
+
+        if( ack != -1 && ack == ACK){
+
+            uint8_t command;
+            uint8_t commandType;
+            uint8_t dataLength;
+            uint8_t crc = 0;
+            uint32_t crcCalculated = 0;
+
+            while(!UARTCharsAvail(UART0_BASE)){};
+            command = UARTCharGetNonBlocking(UART0_BASE);
+
+            while(!UARTCharsAvail(UART0_BASE)){};
+            commandType = UARTCharGetNonBlocking(UART0_BASE);
+
+            while(!UARTCharsAvail(UART0_BASE)){};
+            dataLength = UARTCharGetNonBlocking(UART0_BASE);
+
+            crcCalculated += ACK;
+            crcCalculated += command;
+            crcCalculated += commandType;
+            crcCalculated += dataLength;
+
+            uint8_t data[4];
+
+            int i;
+            for(i=0; i<dataLength; i++){
+
+                while(!UARTCharsAvail(UART0_BASE)){};
+                data[i] = UARTCharGetNonBlocking(UART0_BASE);;
+
+                crcCalculated += data[i];
 
             }
+
+            crcCalculated %= 256;
+
+            while(!UARTCharsAvail(UART0_BASE)){};
+            crc = UARTCharGetNonBlocking(UART0_BASE);
+
+
+            if(crc == crcCalculated){
+
+                batteryCurrent1 = data[0];
+                batteryCurrent2 = data[1];
+                batteryVoltage1 = data[2];
+                batteryVoltage2 = data[3];
+
+
+            }
+
 
 
 
@@ -157,11 +236,7 @@ void UARTIntHandler(void)
         }
 
 
-        break;
-
-
     }
-
 
 
 }

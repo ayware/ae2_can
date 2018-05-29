@@ -16,12 +16,6 @@
 #define SW4	GPIO_PIN_3	//Port D
 
 
-#define PWM1 GPIO_PIN_7  //Port C
-#define PWM2 GPIO_PIN_6  //Port C
-#define INA GPIO_PIN_5  //Port C
-#define INB GPIO_PIN_4  //Port C
-
-
 #define ACK 0x55
 #define NACK 0xAA
 #define COMMAND_STOP 0x00
@@ -39,8 +33,6 @@
 
 #define SPEED_VALUE_LIMIT 10
 #define SPEED_MAX 35
-#define KP 0.5
-#define KI 0.45
 
 
 enum COMMAND
